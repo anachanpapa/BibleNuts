@@ -1,0 +1,398 @@
+# -*- coding: utf-8 -*-
+# this file is released under public domain and you can use without limitations
+
+#########################################################################
+## This is a samples controller
+## - index is the default action of any application
+## - user is required for authentication and authorization
+## - download is for downloading files uploaded in the db (does streaming)
+## - call exposes all registered services (none by default)
+#########################################################################
+
+
+def index():
+    """
+    example action using the internationalization operator T and flash
+    rendered by views/default/index.html or views/generic.html
+
+    if you need a simple wiki simple replace the two lines below with:
+    return auth.wiki()
+    """
+    user = User(a0 or me)
+    if not user or not user.id==me :
+        login = 'No'
+    else:
+        login = 'Yes'      
+
+    #book = 'Gen'     
+    #SELECTED = db(Book).select(orderby=KJV.no)
+    return locals()
+
+
+def user():
+    """
+    exposes:
+    http://..../[app]/default/user/login
+    http://..../[app]/default/user/logout
+    http://..../[app]/default/user/register
+    http://..../[app]/default/user/profile
+    http://..../[app]/default/user/retrieve_password
+    http://..../[app]/default/user/change_password
+    use @auth.requires_login()
+        @auth.requires_membership('group name')
+        @auth.requires_permission('read','table name',record_id)
+    to decorate functions that need access control
+    """
+    return dict(form=auth())
+    
+def select():
+    return locals()
+
+def lookup():
+    return locals()    
+    
+
+def Questioning():
+    import datetime
+    import time
+    activeNo = int(request.vars.activeNo)
+    question = str(request.vars.question)
+    
+    a = db(db.info.info_name == "total_question").select()
+    total_question = a[0].value
+    total_question = total_question + 1
+    db(db.info.info_name == "total_question").update(value=total_question)
+    
+    n = User[me].myQuestion_num
+    n = n + 1
+    db(User.id == me).update(myQuestion_num=n)
+    list = User[me].myQuestion_list
+    if list == None: list = []
+    list.insert(0,n)
+    db(User.id == me).update(myQuestion_list=list)
+    
+    posting = db.question.validate_and_insert(
+        vno=activeNo,
+        body=question,
+        posted_on=datetime.datetime.utcnow(),
+        posted_by=me,
+        question_no=total_question,
+        myQuestion_no=n        
+    )
+    
+    if posting.errors: pass
+    else:
+        time.sleep(0.2)
+        QAs = db(Question.vno == activeNo).select(orderby=~Question.posted_on)
+        data=""
+        for p in QAs:
+            id = str(p.id)
+            reply_num= str(p.reply_num)
+            posted_on = str(p.posted_on)
+            posted_by = str(p.posted_by.first_name)
+            body = str(p.body)
+            body = MARKMIN(body)
+            one = id + "|||" + reply_num + "|||" + posted_on + "|||" + posted_by + "|||" + str(body)
+            if data == "":
+                data = one
+            else:
+                data = data + "<>" + one
+        return data
+
+def postReply():
+    import datetime
+    import time
+    id = request.vars.id
+    lid = long(id)
+    reply = str(request.vars.reply)
+        
+    n = User[me].myReply_num
+    n = n + 1
+    db(User.id == me).update(myReply_num=n)
+    
+    posting = db.reply.validate_and_insert(
+        question=lid,
+        body=reply,
+        posted_on=datetime.datetime.utcnow(),
+        posted_by=me,
+        myReply_no=n
+    )
+    n = Question[lid].reply_num
+    db(Question.id == lid).update(reply_num = n+1)
+    if posting.errors: pass
+    else:
+        time.sleep(0.2)        
+        return id
+        
+def getQA():
+    no = int(request.vars.activeNo)
+    book = str(request.vars.book)
+    chapter = str(request.vars.chapter)
+    verse = str(request.vars.verse)
+    
+    """target = db(KJV.vno == no).select()
+    book = target[0].book
+    book = books[book]
+    chapter = target[0].chapter
+    verse = target[0].verse"""
+    #_target = str(book) + ":" + str(chapter) + ":" + str(verse)
+    _target = book + ":" + chapter + ":" + verse
+    data = _target + "&&&"
+    
+    QAs = db(Question.vno == no).select(orderby=~Question.posted_on)
+    flag = 0
+    for p in QAs:
+        id = str(p.id)
+        reply_num = str(p.reply_num)
+        posted_on = str(p.posted_on)
+        posted_by = str(p.posted_by.first_name)
+        body = str(p.body)
+        body = MARKMIN(body)
+        one = id + "|||" + reply_num + "|||" + posted_on + "|||" + posted_by + "|||" + str(body)
+        if flag == 0:
+            data = data + one
+        else:
+            data = data + "<>" + one
+        flag = 1    
+    return data     
+   
+def getReply():
+    id = request.vars.id
+    qid = long(id)
+    Rpls = db(db.reply.question == qid).select(orderby=Reply.posted_on)
+    data = ""
+    flag = 0
+    for r in Rpls:
+        id = str(r.id)
+        question = str(r.question)
+        posted_on = str(r.posted_on)
+        posted_by = str(r.posted_by.first_name)
+        body = str(r.body)
+        body = MARKMIN(body)
+        one = id + "|||" + question + "|||" + posted_on + "|||" + posted_by + "|||" + str(body)
+        if data == "":
+            data = one
+        else:
+            data = data + "<>" + one    
+    return data
+
+def getMyQuestion():
+    myqNo = int(request.vars.myqNo)
+    num = User[me].myQuestion_num
+    if num == 0: 
+        return 'no_question'
+    else: 
+        start = num - myqNo*10
+        k = start
+        i = 0
+        while True:
+            if len(db(Question.myQuestion_no==k).select()) > 0: 
+                i += 1
+            if i == 10: break;
+            k -= 1
+        
+        end = k
+        if end < 1: end = 1
+        q_my = Question.posted_by == me
+        q_st = Question.myQuestion_no <= start
+        q_ed = Question.myQuestion_no >= end
+        query = q_my & q_st & q_ed
+        Qs = db(query).select(orderby=~Question.myQuestion_no)
+        Qs_str=""
+        for q in Qs:
+            qid=q.id
+            vno=q.vno
+            v = db(KJV.vno==vno).select()
+            book=v[0].book
+            chapter=v[0].chapter
+            verse=v[0].verse
+            on=q.posted_on
+            body=str(q.body)
+            if len(body) >80: body=body[0:80]+"..."
+            rplNum = q.reply_num
+            line = str(qid)+":::"+str(book)+":::"+str(chapter)+":::"+str(verse)+":::"+str(on)+":::"+body+":::"+str(rplNum)
+            if Qs_str == "": Qs_str = line
+            else: Qs_str = Qs_str + '<>' + line
+        return Qs_str 
+
+def getMyReply():
+    return;
+
+def getRcQuestonJS():
+    rcqNo = int(request.vars.rcqNo)
+    return;
+
+def deleteQuestion():
+    qid = int(request.vars.qid)
+    db(Question.id==qid).delete()    
+    return
+    
+    
+def Gen(): return dict(form=auth())
+def Exo(): return dict(form=auth())
+def Lev(): return dict(form=auth())
+def Num(): return dict(form=auth())
+def Deu(): return dict(form=auth())
+def Jos(): return dict(form=auth())
+def Jdg(): return dict(form=auth())
+def Rut(): return dict(form=auth())
+def Sa1(): return dict(form=auth())
+def Sa2(): return dict(form=auth())
+def Kg1(): return dict(form=auth())
+def Kg2(): return dict(form=auth())
+def Ch1(): return dict(form=auth())
+def Ch2(): return dict(form=auth())
+def Ezr(): return dict(form=auth())
+def Neh(): return dict(form=auth())
+def Est(): return dict(form=auth())
+def Job(): return dict(form=auth())
+def Psa(): return dict(form=auth())
+def Pro(): return dict(form=auth())
+def Ecc(): return dict(form=auth())
+def Sol(): return dict(form=auth())
+def Isa(): return dict(form=auth())
+def Jer(): return dict(form=auth())
+def Lam(): return dict(form=auth())
+def Eze(): return dict(form=auth())
+def Dan(): return dict(form=auth())
+def Hos(): return dict(form=auth())
+def Joe(): return dict(form=auth())
+def Amo(): return dict(form=auth())
+def Oba(): return dict(form=auth())
+def Jon(): return dict(form=auth())
+def Mic(): return dict(form=auth())
+def Nah(): return dict(form=auth())
+def Hab(): return dict(form=auth())
+def Zep(): return dict(form=auth())
+def Hag(): return dict(form=auth())
+def Zac(): return dict(form=auth())
+def Mal(): return dict(form=auth())
+def Mat(): return dict(form=auth())
+def Mar(): return dict(form=auth())
+def Luk(): return dict(form=auth())
+def Joh(): return dict(form=auth())
+def Act(): return dict(form=auth())
+def Rom(): return dict(form=auth())
+def Co1(): return dict(form=auth())
+def Co2(): return dict(form=auth())
+def Gal(): return dict(form=auth())
+def Eph(): return dict(form=auth())
+def Phi(): return dict(form=auth())
+def Col(): return dict(form=auth())
+def Th1(): return dict(form=auth())
+def Th2(): return dict(form=auth())
+def Ti1(): return dict(form=auth())
+def Ti2(): return dict(form=auth())
+def Tit(): return dict(form=auth())
+def Plm(): return dict(form=auth())
+def Heb(): return dict(form=auth())
+def Jam(): return dict(form=auth())
+def Pe1(): return dict(form=auth())
+def Pe2(): return dict(form=auth())
+def Jo1(): return dict(form=auth())
+def Jo2(): return dict(form=auth())
+def Jo3(): return dict(form=auth())
+def Jde(): return dict(form=auth())
+def Rev(): return dict(form=auth())
+
+def Gen_2(): return dict(form=auth())
+def Exo_2(): return dict(form=auth())
+def Lev_2(): return dict(form=auth())
+def Num_2(): return dict(form=auth())
+def Deu_2(): return dict(form=auth())
+def Jos_2(): return dict(form=auth())
+def Jdg_2(): return dict(form=auth())
+def Rut_2(): return dict(form=auth())
+def Sa1_2(): return dict(form=auth())
+def Sa2_2(): return dict(form=auth())
+def Kg1_2(): return dict(form=auth())
+def Kg2_2(): return dict(form=auth())
+def Ch1_2(): return dict(form=auth())
+def Ch2_2(): return dict(form=auth())
+def Ezr_2(): return dict(form=auth())
+def Neh_2(): return dict(form=auth())
+def Est_2(): return dict(form=auth())
+def Job_2(): return dict(form=auth())
+def Psa_2(): return dict(form=auth())
+def Pro_2(): return dict(form=auth())
+def Ecc_2(): return dict(form=auth())
+def Sol_2(): return dict(form=auth())
+def Isa_2(): return dict(form=auth())
+def Jer_2(): return dict(form=auth())
+def Lam_2(): return dict(form=auth())
+def Eze_2(): return dict(form=auth())
+def Dan_2(): return dict(form=auth())
+def Hos_2(): return dict(form=auth())
+def Joe_2(): return dict(form=auth())
+def Amo_2(): return dict(form=auth())
+def Oba_2(): return dict(form=auth())
+def Jon_2(): return dict(form=auth())
+def Mic_2(): return dict(form=auth())
+def Nah_2(): return dict(form=auth())
+def Hab_2(): return dict(form=auth())
+def Zep_2(): return dict(form=auth())
+def Hag_2(): return dict(form=auth())
+def Zac_2(): return dict(form=auth())
+def Mal_2(): return dict(form=auth())
+def Mat_2(): return dict(form=auth())
+def Mar_2(): return dict(form=auth())
+def Luk_2(): return dict(form=auth())
+def Joh_2(): return dict(form=auth())
+def Act_2(): return dict(form=auth())
+def Rom_2(): return dict(form=auth())
+def Co1_2(): return dict(form=auth())
+def Co2_2(): return dict(form=auth())
+def Gal_2(): return dict(form=auth())
+def Eph_2(): return dict(form=auth())
+def Phi_2(): return dict(form=auth())
+def Col_2(): return dict(form=auth())
+def Th1_2(): return dict(form=auth())
+def Th2_2(): return dict(form=auth())
+def Ti1_2(): return dict(form=auth())
+def Ti2_2(): return dict(form=auth())
+def Tit_2(): return dict(form=auth())
+def Plm_2(): return dict(form=auth())
+def Heb_2(): return dict(form=auth())
+def Jam_2(): return dict(form=auth())
+def Pe1_2(): return dict(form=auth())
+def Pe2_2(): return dict(form=auth())
+def Jo1_2(): return dict(form=auth())
+def Jo2_2(): return dict(form=auth())
+def Jo3_2(): return dict(form=auth())
+def Jde_2(): return dict(form=auth())
+def Rev_2(): return dict(form=auth())
+    
+def download():
+    """
+    allows downloading of uploaded files
+    http://..../[app]/default/download/[filename]
+    """
+    return response.download(request, db)
+
+
+def call():
+    """
+    exposes services. for e xample:
+    http://..../[app]/default/call/jsonrpc
+    decorate with @services.jsonrpc the functions to expose
+    supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv
+    """
+    return service()
+
+
+@auth.requires_signature()
+def data():
+    """
+    http://..../[app]/default/data/tables
+    http://..../[app]/default/data/create/[table]
+    http://..../[app]/default/data/read/[table]/[id]
+    http://..../[app]/default/data/update/[table]/[id]
+    http://..../[app]/default/data/delete/[table]/[id]
+    http://..../[app]/default/data/select/[table]
+    http://..../[app]/default/data/search/[table]
+    but URLs must be signed, i.e. linked with
+      A('table',_href=URL('data/tables',user_signature=True))
+    or with the signed load operator
+      LOAD('default','data.load',args='tables',ajax=True,user_signature=True)
+    """
+    return dict(form=crud())

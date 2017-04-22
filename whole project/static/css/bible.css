@@ -1,0 +1,59 @@
+@media only screen and (max-width : 768px) { html{font-size:12px;}}
+@media only screen and (min-width : 768px) { html{font-size:14px;}} 
+
+.oneVerse{
+    display: inline-block;  
+    clear:both;
+    width: 100%;
+    font-size:1em;
+    font-family: CharisSILRegular, Georgia, 'Times New Roman', Times, serif;
+    color: #555;
+    line-height:2em;
+    margin-bottom:0.3em;
+}
+
+.oneVerse:hover{
+    background-color:#F0F0BC;
+}
+
+.selected{
+    background-color:#DDDD7D;
+}
+
+.bibleNo{
+    display: inline-block;  
+    float: left;
+    width: 50px;
+}    
+
+.bibleBook{
+    display: inline-block;  
+    float: left;
+    margin-left:2%;
+    width: 4.5%;
+    font-family: 'Roboto', sans-serif;
+    color: #999;
+}    
+
+.bibleChapter{
+    display: inline-block;  
+    float: left;
+    width: 3%;
+    font-family: 'Roboto', sans-serif;
+    color: #999;
+}    
+.bibleVerse{
+    display: inline-block;  
+    float: left;
+    width: 4%;
+    font-family: 'Roboto', sans-serif; 
+    color: #999;
+}
+    
+.bibleText{
+    display: inline-block;  
+    float: left;
+    width: 86%; 
+    font-size:1.2em;    
+}
+

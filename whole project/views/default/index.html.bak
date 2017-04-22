@@ -1,0 +1,1090 @@
+{{extend 'layout.html'}}
+
+
+<!--
+    @akirame >> textarea ::@dame:kakkowarusugi,wakarinikui
+    @bible split by chapter :: @@imaichi: too many files, sousa fukuzatsu: pull down with slide bar
+    @iframe 
+       >> script on opended :: @@@
+       >> script on opener :: @dame: v_id ni onclick settei : tabun shori omoi 
+    @sonohoka
+
+-->
+
+<script><!-- move to after #Bible -->
+$('#Bible').load(function(){
+
+    //alert("kuru");
+    var $verse = $('.oneVerse', this.contentWindow.document);
+    $verse.css('background-color','#fff555');
+});
+function iframeMove(){
+    window.Bible.location.href = "Gen.html#vid_10";
+}
+</script>
+<!--button onclick="iframeMove()">move</button-->
+
+{{if login=='Yes':}}
+<script>
+var nav2 =     
+'<a class="nav2" href="javascript:void(0)" onclick="searchOpen();">Search</a>\
+<a class="nav2" href="javascript:void(0)" onclick="myQuestion();">My Questions</a>\
+<a class="nav2" href="javascript:void(0)" onclick="myReply();">My Replys</a>\
+<a class="nav2" href="javascript:void(0)" onclick="recentQuestions();">Recent Questions</a>\
+<a class="nav2" href="javascript:void(0)" onclick="about();">About</a>\
+<a class="nav2" href="javascript:void(0)" onclick="donation();">Donate</a>';
+$('#nav2_contents').html(nav2); 
+</script>
+{{pass}}
+
+<div id="leftHalf">
+    <!--a onclick="import_kjv()">import KJV</a-->
+   
+    <iframe id="Bible" src="Gen.html" frameborder="0"></iframe>
+    <div id="openSpace"></div>
+</div>
+
+<div id="Study">
+    <div id="Selected">Click a Bible verse.</div>
+    <div id="Question">
+    {{if login=='No':}} <div id="askLogin">Please login to post your question.</div> 
+        <script>
+            $("#Question").css("height","4%");
+        </script>
+    {{elif login=='Yes':}}
+    <div class="postLabel">Please share your question about this verse. (up to 3000 letters)</div>
+    <div class="postBodyWrap">
+        <div class="editable" id="postBody">
+            <div class="inputArea inputlimitation" contenteditable="true"></div>  
+        </div>
+        <div id="Qbuttons">
+            <button type=button id="QsubmitButton" onclick="Question();">submit</button>
+            <button type=button id="QreferButton" onclick="openWindow('postBody')">reference</button>
+        </div>        
+    </div>
+
+    {{pass}}
+    </div>
+    {{if login=='No':}} 
+    <div id="PastQA" class="PastQA_logout"></div>
+    {{elif login=='Yes':}}
+    <div id="PastQA" class="PastQA_login"></div>
+    {{pass}}
+    <input id="activeBook" type="hidden"/>
+    <input id="activeNo" type="hidden"/>
+    <input id="activeID" type="hidden"/>
+    <input id="book_no" type="hidden"/>
+</div>
+
+<script>
+var getQAJS = "{{=URL('getQA')}}"; 
+function selectVerse(book,chapter,verse,no,qid,rid,open){
+    //alert(no);
+    $('#postBody').find('.inputlimitation').attr("contenteditable", true);
+    $('#postBody').css("background","#fff");
+    setLimitation();
+    $('#QsubmitButton').attr("disabled", false);
+    $('#QreferButton').attr("disabled", false);    
+    
+    var activeNo = no;
+    $('#activeNo').val(activeNo);
+    //alert(activeNo);
+    
+    jQuery.post(getQAJS,      
+        {activeNo:activeNo,book:book,chapter:chapter,verse:verse},
+        function(data){
+            //alert(data);
+            var pair = data.split('&&&');
+            var target = pair[0].split(':');
+            var book = target[0];
+            var chapter = target[1];
+            var verse = target[2];
+            var label = '<div id="selectBook">' + book + '</div><div id="selectChapter">' + chapter + '&nbsp;:&nbsp;</div>\
+            <div id="selectVerse">' + verse + '</div>'; 
+            $('#Selected').html(label);
+            
+            if(pair[1]==""){
+                $("#PastQA").html("");
+            }else{
+                //alert(pair[1]);
+                var set = pair[1].split('<>');
+                //alert(set.length);
+                var comments='<div id="comments">';
+                var target_reply_num = "";
+                for(var i=0; i<set.length; i++){
+                    var _one = set[i];
+                    var one = _one.split('|||');
+                    var id = one[0]
+                    reply_num = one[1];
+                    var arrow = '<div class="openQA" id="openQA_' + id + '"></div>';
+                    if (reply_num != '0'){
+                        arrow = '<div class="openQA" id="openQA_' + id + '">\
+                        <div class="rightArrow" title="open" onclick="openReply(' + id + ',' + reply_num + ')"></div>&emsp;(+' + reply_num + ')</div>';
+                    }                         
+                    var on = one[2];
+                    on = on.replace(/-/g,'/');
+                    on = on.replace(/\s/,'&emsp;');
+                    on = on.match(/^.{2}(.+).{10}$/)[1];
+                    var by = one[3];
+                    var body = one[4];
+                    //alert(body);
+                    body = body.replace(/<p>|<\/p>/g,'');
+                    body = body.replace(/<a href/,'<a target="_blank" href');
+                    body = body.replace(/&lt;\/?div.*?&gt;/gi, "");
+                    body = body.replace(/&lt;(\/?a.*?)&gt;/gi, "<$1>");
+                    body = body.replace(/&amp;nbsp;/gi,'&nbsp;');
+                    var cleanbody = body.replace(/<\/?[^>]+>/gi, "");
+                    cleanbody = cleanbody.replace(/\'/g,'&rsquo;');
+                    cleanbody = cleanbody.replace(/\"/g,'&rdquo;');
+                    var line = '<div class="oneQ" id="oneQ_' + id + '">';
+                    if(id == qid){
+                        line = line + '<div class="Qheader" style="background-color:#CECEFF;">';
+                        target_reply_num = reply_num;
+                    }else{
+                        line = line + '<div class="Qheader">';
+                    }    
+
+                    line = line + arrow + 
+                            '<div class="Qby">' + by + '</div>\
+                            <div class="Qinfo"></div>\
+                            <div class="Qon">' + on + '</div>\
+                            <div class="Qreply"><img title="reply" class="RplImg"\
+                            src="/PublicBibleStudyNotebook/static/images/reply.png" onclick="openReplyForm(\'' + id + '\',\'' + on + '\',\'' + by + '\',\'' + cleanbody + '\')"></div>\
+                        </div>\
+                        <div class="Qbody">' + body + '</div>\
+                        <div class="QreplyForm" id="QreplyForm_' + id + '"></div>\
+                        <div class="Qreplys" id="Qreplys_' + id + '"></div>\
+                    </div>';
+                    comments += line; 
+                }
+                comments += '</div>';
+                //alert(comments);
+                $("#PastQA").html(comments);
+                
+                if(typeof qid !== 'undefined' & typeof rid === 'undefined') {
+                    location.href = '#oneQ_' + qid;
+                    if(target_reply_num > 0) openReply(qid,target_reply_num);
+                }    
+                if(typeof rid !== 'undefined') openReply(qid,target_reply_num,rid);
+                if(typeof open !== 'undefined') {
+                    {{if login=='No':}}
+                    alert('Please login to reply this question.');                     
+                    {{else:}}
+                    $('#oneQ_'+qid).find('.RplImg').click();
+                    {{pass}}
+                }    
+            }
+        }
+    );
+}    
+</script>
+
+<script>
+var getQAJS2 = "{{=URL('getQA2')}}"; 
+function selectVerse2(title){
+    set = title.match(/^(.+?)\s(\d+):(\d+)$/);
+    var book = RegExp.$1;
+    var chapter = RegExp.$2;
+    var verse = RegExp.$3;
+    //alert(book+"-"+chapter+"-"+verse);
+    
+    $('oneVerse').removeClass('selected');  
+    $('#postBody').find('.inputlimitation').attr("contenteditable", true);
+    $('#postBody').css("background","#fff");
+    setLimitation();
+    $('#QsubmitButton').attr("disabled", false);
+    $('#QreferButton').attr("disabled", false);    
+    
+    jQuery.post(getQAJS2,      
+        {book:book,chapter:chapter,verse:verse},
+        function(data){
+            //alert(data);
+            var pair = data.split('&&&');
+            var target = pair[0].split(':');
+            var vno = target[0];
+            var book = target[1];
+            var chapter = target[2];
+            var verse = target[3];
+            var activeNo = $('#activeNo').val();
+            if(parseInt(activeNo, 10) == vno) return;
+            //alert(activeNo);
+            if (activeNo != "") $('#Bible').contents().find('#vid_'+activeNo).removeClass('selected');
+            activeNo = vno;
+            $('#activeNo').val(activeNo);
+            //alert(book+":"+activeNo);
+            $('#Bible').attr({'src':book + '.html#vid_' + activeNo});
+            $('#Bible').load(function(){
+                $('#Bible').contents().find('#vid_'+activeNo).addClass('selected');     
+            }); 
+
+            var label = '<div id="selectBook">' + book + '</div><div id="selectChapter">' + chapter + '&nbsp;:&nbsp;</div>\
+            <div id="selectVerse">' + verse + '</div>'; 
+            $('#Selected').html(label);
+            
+            if(pair[1]==""){
+                $("#PastQA", parent.document).html("");
+            }else{
+                //alert(pair[1]);
+                var set = pair[1].split('<>');
+                //alert(set.length);
+                var comments='<div id="comments">'; 
+                for(var i=0; i<set.length; i++){
+                    var _one = set[i];
+                    var one = _one.split('|||');
+                    var id = one[0]
+                    var reply_num = one[1];
+                    var arrow = '<div class="openQA" id="openQA_' + id + '"></div>';
+                    if (reply_num != '0'){
+                        arrow = '<div class="openQA" id="openQA_' + id + '">\
+                        <div class="rightArrow" title="open" onclick="openReply(' + id + ',' + reply_num + ')"></div>&emsp;(+' + reply_num + ')</div>';
+                    }                         
+                    var on = one[2];
+                    on = on.replace(/-/g,'/');
+                    on = on.replace(/\s/,'&emsp;');
+                    on = on.match(/^.{2}(.+).{10}$/)[1];
+                    var by = one[3];
+                    var body = one[4];
+                    body = body.replace(/<p>|<\/p>/g,'');
+                    body = body.replace(/<a href/,'<a target="_blank" href');
+                    body = body.replace(/&lt;\/?div.*?&gt;/gi, "");
+                    body = body.replace(/&lt;(\/?a.*?)&gt;/gi, "<$1>");
+                    body = body.replace(/&amp;nbsp;/gi,'&nbsp;');
+                    var cleanbody = body.replace(/<\/?[^>]+>/gi, "");
+                    cleanbody = cleanbody.replace(/\'/g,'&rsquo;');
+                    cleanbody = cleanbody.replace(/\"/g,'&rdquo;');
+                    var line = 
+                    '<div class="oneQ" id="oneQ_' + id + '">\
+                        <div class="Qheader">';
+                    line = line + arrow + 
+                            '<div class="Qby">' + by + '</div>\
+                            <div class="Qinfo"></div>\
+                            <div class="Qon">' + on + '</div>\
+                            <div class="Qreply"><img title="reply" class="RplImg"\
+                            src="/PublicBibleStudyNotebook/static/images/reply.png" onclick="openReplyForm(\'' + id + '\',\'' + on + '\',\'' + by + '\',\'' + cleanbody + '\')"></div>\
+                        </div>\
+                        <div class="Qbody">' + body + '</div>\
+                        <div class="QreplyForm" id="QreplyForm_' + id + '"></div>\
+                        <div class="Qreplys" id="Qreplys_' + id + '"></div>\
+                    </div>';
+                    comments += line; 
+                }
+                comments += '</div>';
+                //alert(comments);
+                $("#PastQA", parent.document).html(comments);
+            }
+        }
+    );
+}    
+</script>
+
+<script>
+//alert("kuru");
+
+$('#postBody').find('.inputlimitation').attr("contenteditable", false);
+$('#postBody').css("background","#f7f7f7");
+$('#QsubmitButton').attr("disabled", true);
+$('#QreferButton').attr("disabled", true); 
+</script>
+
+<script>
+var QuestioningJS = "{{=URL('Questioning')}}"; 
+function Question(){
+    var question = $('#postBody').find('.inputArea').html();
+    if(question == ""){
+        alert("Question is empty.");
+    }else if(question.length > 3000){
+        alert("Question is over 3000 letters.");        
+    }else{
+        var activeNo = $("#activeNo").val(); 
+        //alert(activeNo);
+        $('#QsubmitButton').attr("disabled", true);
+        jQuery.post(QuestioningJS,      
+            {activeNo:activeNo,question:question},
+            function(){
+                var ctl = $('#Bible').contents().find('#vid_'+activeNo);
+                var book = ctl.find('.bibleBook').text();
+                var chapter = ctl.find('.bibleChapter').text();
+                var verse = ctl.find('.bibleVerse').text();
+                //alert("kuru");
+                selectVerse(book,chapter,verse,activeNo);
+                $('#postBody').find(".inputArea").html("");
+                $('#QsubmitButton').attr("disabled", false);
+                myQuestion()
+            }
+        );	           
+    }
+}
+</script>
+
+<script>
+var postReplyJS = "{{=URL('postReply')}}"; 
+function postReply(qid,rid){
+    if(typeof rid === 'undefined'){
+        var reply = $('#RpostBody_' + qid).html();
+        var message = $('#RpostBody_' + qid).find('.inputArea').html();
+        rid = 'undef';
+    }else{
+        var reply = $('#RpostBody_' + rid).html();
+        var message = $('#RpostBody_' + rid).find('.inputArea').html();
+    }    
+    
+    if(message == ""){
+        alert("Reply is empty.");
+    }else if(message.length > 3000){
+        alert("Reply is over 3000 letters.");
+    }else if(!message.match(/class="referCode"/)){
+        alert("At least one reference needed.");
+    }else{
+        jQuery.post(postReplyJS,      
+            {qid:qid,rid:rid,reply:reply},
+            function(data){
+                pair = data.split(':');
+                var qid = pair[0];
+                var reply_num = pair[1];
+                //alert(reply_num);
+                var down = '<div class="downArrow" title="close" id="downArrow_' + qid + '" onclick="closeQA(' + qid + ')"></div>';
+                $('#openQA_' + qid).html(down);
+                openReply(qid,reply_num);
+                myReply();
+            }
+        );	
+        $('#QreplyForm_'+qid).html("");        
+    }
+}
+</script>
+
+<script>
+function chgBook(){
+    //$("#Bible").load(book+".html");
+    //<iframe id="Bible" src="Gen.html" frameborder="0"></iframe>
+    var selectBox = document.getElementById("bookSelect");
+    var book = selectBox.options[selectBox.selectedIndex].value; 
+    $("#Bible").attr("src", book+".html");
+    $('#postBody').find('.inputlimitation').attr("contenteditable", false);
+    $('#postBody').css("background","#f7f7f7");
+    $('#QsubmitButton').attr("disabled", true);
+    $('#QreferButton').attr("disabled", true);
+    $("#Selected").text("Click a Bible verse.");
+}
+</script>
+
+<script>
+function openReplyForm(qid,on,by,body){
+    {{if login=='No':}}
+    alert('Please login to reply this question.');                     
+    return;
+    {{pass}}
+
+    //alert("kuru");
+    if($('#QreplyForm_'+qid).html() != ""){
+            $('#QreplyForm_'+qid).html("");
+    }else{
+        
+        $('.QreplyForm').html("");
+        var form = '\
+        <div class="postLabel">Please reply to this question. (up to 3000 letters, "at least one reference needed") </div>\
+        <div class="RpostBodyWrap">\
+        <div class="editable RpostBody" id="RpostBody_' + qid + '">\
+            <div class="inputArea inputlimitation" contenteditable="true"></div>\
+            <div class="infoArea inputlimitation">' + on + '&emsp;&emsp;' + by + ':</div>\
+            <blockquote class="inputlimitation orgMessage" contenteditable="true" style="margin: 0;margin-left: 0.8ex;border-left: 1px #B2246B solid;">'+body+'</blockquote>\
+        </div>\
+        </textarea></div>\
+        <div class="Rsubmit"><button type=button class="RsubmitButton btn" onclick="postReply(' + qid + ')">submit</button></div>\
+        <div class="Rrefer"><button type="button" class="RreferButton btn" \
+        onclick="openWindow(\'RpostBody_' + qid + '\')">\
+        reference</button></div>';
+        
+        $('#QreplyForm_'+qid).html(form);
+        setLimitation();
+
+    }  
+}
+</script>
+<script>
+function openReplyForm2(qid,on,by,body,rid){
+    {{if login=='No':}}
+    alert('Please login to reply this question.');                     
+    return;
+    {{pass}}
+
+    //alert("kuru");
+    if($('#RreplyForm_'+rid).html() != ""){
+            $('#RreplyForm_'+rid).html("");
+    }else{
+        
+        $('.RreplyForm').html("");
+        var form = '\
+        <div class="postLabel">Please reply to this question. (up to 3000 letters, "at least one reference needed") </div>\
+        <div class="RpostBodyWrap">\
+        <div class="editable RpostBody" id="RpostBody_' + rid + '">\
+            <div class="inputArea inputlimitation" contenteditable="true"></div>\
+            <div class="infoArea inputlimitation">' + on + '&emsp;&emsp;' + by + ':</div>\
+            <blockquote class="inputlimitation orgMessage" contenteditable="true" style="margin: 0;margin-left: 0.8ex;border-left: 1px #B2246B solid;">'+body+'</blockquote>\
+        </div>\
+        </textarea></div>\
+        <div class="Rsubmit"><button type=button class="RsubmitButton btn" onclick="postReply(' + qid + ',' + rid + ')">submit</button></div>\
+        <div class="Rrefer"><button type="button" class="RreferButton btn" \
+        onclick="openWindow(\'RpostBody_' + rid + '\')">\
+        reference</button></div>';
+        
+        $('#RreplyForm_'+rid).html(form);
+        setLimitation();
+
+    }  
+}
+</script>
+
+<script>
+function openWindow(id){
+    window.open('/PublicBibleStudyNotebook/default/select','select a Bible verse','width=900,height=500,location=no');
+    $('#activeID').val(id);
+}
+</script>
+
+<script>
+var getReplyJS = "{{=URL('getReply')}}";
+function openReply(qid,reply_num,target_rid){
+    //alert(reply_num);
+    //alert(target_rid);
+    var down = '<div class="downArrow" title="close" id="downArrow_' + qid + '" onclick="closeQA(' + qid + ',' + reply_num + ')"></div>';
+    $('#openQA_'+qid).html(down);
+
+    jQuery.post(getReplyJS,        
+		{qid:qid},
+        function(data){
+            //alert(data);
+            var question = "";
+            var set = data.split('<>');
+            var replys='<div class="replys">'; 
+            for(var i=0; i<set.length; i++){
+                var _one = set[i];
+                one = _one.split('|||');
+                rid = one[0];
+                question = one[1];
+                var on = one[2];
+                on = on.replace(/-/g,'/');
+                on = on.replace(/\s/,'&emsp;');
+                on = on.match(/^.{2}(.+).{10}$/)[1];
+                var by = one[3];
+                var body = one[4];
+                body = body.replace(/<p>|<\/p>/g,'');
+                body = body.replace(/<a href/,'<a target="_blank" href');
+                body = body.replace(/&lt;div class="infoArea inputlimitation"&gt;(.*?)&lt;\/div&gt;/gi, 
+                "<div class=\"infoArea inputlimitation\">$1</div>");
+                body = body.replace(/&lt;\/?div.*?&gt;/gi, "");
+                body = body.replace(/&lt;(\/?a.*?)&gt;/gi, "<$1>");
+                body = body.replace(/&amp;nbsp;/gi,'&nbsp;');                
+                body = body.replace(/&lt;(\/?blockquote.*?)&gt;/gi, "<$1>");
+                body = body.replace(/&amp;emsp;/gi,'&emsp;');             
+                var cleanbody = body.replace(/<blockquote.*?\/blockquote>/gi, "");
+                cleanbody = cleanbody.replace(/<div.*?\/div>/gi, "");
+                cleanbody = cleanbody.replace(/<\/?[^>]+>/gi, "");
+                cleanbody = cleanbody.replace(/\'/g,'&rsquo;');
+                cleanbody = cleanbody.replace(/\"/g,'&rdquo;');
+                var line = 
+                '<div class="oneR" id="oneR_' + rid + '">';
+                
+                if(rid == target_rid){
+                    line = line + '<div class="Rheader" style="border-top:2px solid #CECEFF; border-bottom:2px solid #CECEFF;">';
+                }else{
+                    line = line + '<div class="Rheader">';
+                }  
+                
+                line = line +
+                       '<div class="Rspace"></div>\
+                        <div class="Rby">' + by + '</div>\
+                        <div class="Rinfo"></div>\
+                        <div class="Ron">' + on + '</div>\
+                        <div class="Rreply"><img title="reply" class="RplImg"\
+                        src="/PublicBibleStudyNotebook/static/images/reply.png" onclick="openReplyForm2(\'' 
+                        + question + '\',\'' + on + '\',\'' + by + '\',\'' + cleanbody + '\',\'' + rid + '\')"></div>\
+                    </div>\
+                    <div class="Rbody">' + body + '</div>\
+                    <div class="RreplyForm" id="RreplyForm_' + rid + '"></div>\
+                </div>';
+                replys += line; 
+            }                
+            replys += '</div>';
+            //alert(replys);
+            //alert(question);
+            $('#Qreplys_'+question).html(replys);
+            if(typeof target_rid !== 'undefined') location.href = '#oneR_' + target_rid;            
+        }
+	);      
+}
+
+function closeQA(id,reply_num){
+    var right = '<div class="rightArrow" title="open" id="rightArrow_' + id + '" onclick="openReply(' + id +  ',' + reply_num + ')"></div>&emsp;(+' + reply_num + ')';
+    $('#openQA_'+id).html(right);
+    $('#Qreplys_'+id).html("");    
+}
+</script>
+
+<script>
+function setLimitation(){
+    $('.editable').on('click', function(e){
+        var ctl = e.target;
+        if ($(ctl).hasClass('editable')){
+            $(ctl).children('.inputArea').focus();
+        }
+    });
+       
+    $('.inputlimitation').on('keydown', function(e) {
+        if (e.which == 13) {
+            return false;
+        }
+    });
+
+    $('.inputlimitation').on('focus', function(e) {
+        $(this).parent("div").css("outline","solid 2px #B5B6FF");
+    }).blur(function(){
+        $(this).parent("div").css("outline","none");
+    });
+        
+    $('.inputlimitation').on('paste', function(e) {
+        var ctl = $(this);
+        var text = ctl.html();
+        text = text.replace(/<(\/?[^>]+?)>/gi, "%%$1%%");
+        ctl.html(text);
+        setTimeout(function() {
+            var new_text = ctl.html();
+            //alert(new_text);
+            new_text.replace(/\n/g, "");
+            new_text = new_text.replace(/<\/?[^>]+?>/gi, "");
+            new_text = new_text.replace(/%%(\/?[^%]+?)%%/gi, '<$1>');      
+            ctl.html(new_text);
+             
+        }, 100);
+    });
+}
+</script>
+
+<script>
+function lookup(book,no){
+    //alert(book + ":" + no);
+    var pair = book + ":" + no;
+    $('#book_no').val(pair);
+    window.open('/PublicBibleStudyNotebook/default/lookup','lookup a Bible verse','width=900,height=500,location=no');
+}
+</script>
+
+<script>
+function searchOpen(){
+    openSpace("Search Bible");
+    var org = $('#openSpace').html();
+    var searchbox = 
+    '<form onsubmit="return false;" id="searchForm"><span><input type="text" id="search" placeholder=\'e.g. created "by him"\'>\
+    <input type="button" value="search" id="searchButton" class="btn" onclick="searchBible();"></span></form>\
+    <div id="loading"></div>\
+    <div id="hitCount"></div><div id="searchResult"></div>';
+    $('#openSpace').html(org+searchbox);
+    $("#search").focus();
+
+}
+
+function searchBible(){
+    $("#hitCount").html("");
+    $('#searchResult').html("");
+    $('#loading').html('<img src="/PublicBibleStudyNotebook/static/images/load.gif">');
+    var query = $("#search").val();
+    if(query == "") return;
+    //alert(query);
+    var q = query.split('');
+    var query2 = "";
+    var quate_flag = 0;
+    for(var i = 0; i < q.length; i++){
+        if(q[i] == '\"') {
+            if(quate_flag == 0){
+                quate_flag = 1;
+            }else{
+                quate_flag = 0;
+            }
+        }else{
+            if(quate_flag == 1 && q[i] == ' '){ 
+                query2 += '$$$';
+            }else{
+                query2 += q[i];
+            }    
+        }
+    }
+    //alert(query2);
+    
+    var get_biblia_key = "{{=URL('get_biblia_key')}}"; 
+    $.get( get_biblia_key, function( biblia_key ) {
+        $.ajax({
+          type: 'GET',
+          url: 'http://api.biblia.com/v1/bible/search/KJV.js?query=' + query + '&mode=verse&sort=passage&start=0&limit=1000&key=' + biblia_key,
+          dataType: 'json',
+          success: function(json){
+            //alert(json.resultCount);
+            var org = $('#openSpace').html();
+            var hit = json.resultCount;
+            if(hit > 1000){
+                var hitcode = '1 - 1000 of all <span style="color:#08C;">' + json.resultCount + '</span> results';
+            }else{
+                var hitcode = '<span style="color:#08C;">' + json.resultCount + '</span> results';
+            }            
+            $('#hitCount').html(hitcode);
+            var results = json.results;
+            var display = "";
+            for(var count in results){
+                var keywords = query2.split(' ');                
+                var title = results[count].title;
+                var text = results[count].preview;
+                for(var i=0; i < keywords.length; i++){
+                    keyword = keywords[i].replace(/\$\$\$/g,' ');
+                    //alert(keyword);
+                    text = text.replace(new RegExp("([^A-Za-z0-9_])" + keyword + "([^A-Za-z0-9_])", 'g'), "$1"+'<span style="color:#C96697;font-weight:bold">'+keyword+'</span>'+"$2");                 
+                }
+                display = display + '<div class="oneResult"><a class="oneTitle" onclick="selectVerse2(\'' + title + '\');">' + title + '</a><div class="oneText">' + text + '</div></div>'; 
+            }
+            $('#loading').html("");
+            $('#searchResult').html(display);
+          }
+        });
+    });
+}
+</script>
+
+<script>
+var getMyQuestionJS = "{{=URL('getMyQuestion')}}"; 
+function myQuestion(theten){
+    if(typeof theten === 'undefined') theten=1;
+    //alert(theten);
+    openSpace("My Questions");
+    jQuery.post(getMyQuestionJS,        
+		{theten:theten},
+        function(data){
+            //alert(data);
+            if(data == 'no_question'){
+                var str = '<div id="OS-noQuestion">no question</div>';
+                var org = $('#openSpace').html();
+                $('#openSpace').html(org+str);
+            }else{
+                var pair = data.split('$$$');
+                var decades = pair[0];
+                //alert(decades);
+                var dstr = "";
+                var thehundred = Math.floor((theten-1)/10);
+                //alert(theten+":"+thehundred);
+                if(decades > thehundred*10+11){
+                    dstr = '<div class="OS-decades">';
+                    if(thehundred >= 1) dstr = dstr + '<a class="OS-MS-theten" onclick="myQuestion(' + (thehundred*10) + ')">prev</a>';
+                    dstr = dstr + 
+                               '<a class="OS-MS-theten" id="OS-MS-theten_' + (thehundred*10+1) +'" onclick="myQuestion(' + (thehundred*10+1) + ')">' + (thehundred*10+1) + '</a>\
+                                <a class="OS-MS-theten" id="OS-MS-theten_' + (thehundred*10+2) +'" onclick="myQuestion(' + (thehundred*10+2) + ')">' + (thehundred*10+2) + '</a>\
+                                <a class="OS-MS-theten" id="OS-MS-theten_' + (thehundred*10+3) +'" onclick="myQuestion(' + (thehundred*10+3) + ')">' + (thehundred*10+3) + '</a>\
+                                <a class="OS-MS-theten" id="OS-MS-theten_' + (thehundred*10+4) +'" onclick="myQuestion(' + (thehundred*10+4) + ')">' + (thehundred*10+4) + '</a>\
+                                <a class="OS-MS-theten" id="OS-MS-theten_' + (thehundred*10+5) +'" onclick="myQuestion(' + (thehundred*10+5) + ')">' + (thehundred*10+5) + '</a>\
+                                <a class="OS-MS-theten" id="OS-MS-theten_' + (thehundred*10+6) +'" onclick="myQuestion(' + (thehundred*10+6) + ')">' + (thehundred*10+6) + '</a>\
+                                <a class="OS-MS-theten" id="OS-MS-theten_' + (thehundred*10+7) +'" onclick="myQuestion(' + (thehundred*10+7) + ')">' + (thehundred*10+7) + '</a>\
+                                <a class="OS-MS-theten" id="OS-MS-theten_' + (thehundred*10+8) +'" onclick="myQuestion(' + (thehundred*10+8) + ')">' + (thehundred*10+8) + '</a>\
+                                <a class="OS-MS-theten" id="OS-MS-theten_' + (thehundred*10+9) +'" onclick="myQuestion(' + (thehundred*10+9) + ')">' + (thehundred*10+9) + '</a>\
+                                <a class="OS-MS-theten" id="OS-MS-theten_' + (thehundred*10+10) +'" onclick="myQuestion(' + (thehundred*10+10) + ')">' + (thehundred*10+10) + '</a>\
+                                <a class="OS-MS-theten" onclick="myQuestion(' + (thehundred*10+11) + ')">next</a>';
+                    dstr = dstr + '</div>';
+                }else{
+                    dstr = '<div class="OS-decades">';
+                    if(thehundred >= 1) dstr = dstr + '<a class="OS-MS-theten" onclick="myQuestion(' + (thehundred*10) + ')">prev</a>';
+                    if(decades >= thehundred*10+1) dstr = dstr + '<a class="OS-MS-theten" id="OS-MS-theten_' + (thehundred*10+1) +'" onclick="myQuestion(' + (thehundred*10+1) + ')">' + (thehundred*10+1) + '</a>';
+                    if(decades >= thehundred*10+2) dstr = dstr + '<a class="OS-MS-theten" id="OS-MS-theten_' + (thehundred*10+2) +'" onclick="myQuestion(' + (thehundred*10+2) + ')">' + (thehundred*10+2) + '</a>';
+                    if(decades >= thehundred*10+3) dstr = dstr + '<a class="OS-MS-theten" id="OS-MS-theten_' + (thehundred*10+3) +'" onclick="myQuestion(' + (thehundred*10+3) + ')">' + (thehundred*10+3) + '</a>';
+                    if(decades >= thehundred*10+4) dstr = dstr + '<a class="OS-MS-theten" id="OS-MS-theten_' + (thehundred*10+4) +'" onclick="myQuestion(' + (thehundred*10+4) + ')">' + (thehundred*10+4) + '</a>';
+                    if(decades >= thehundred*10+5) dstr = dstr + '<a class="OS-MS-theten" id="OS-MS-theten_' + (thehundred*10+5) +'" onclick="myQuestion(' + (thehundred*10+5) + ')">' + (thehundred*10+5) + '</a>';
+                    if(decades >= thehundred*10+6) dstr = dstr + '<a class="OS-MS-theten" id="OS-MS-theten_' + (thehundred*10+6) +'" onclick="myQuestion(' + (thehundred*10+6) + ')">' + (thehundred*10+6) + '</a>';
+                    if(decades >= thehundred*10+7) dstr = dstr + '<a class="OS-MS-theten" id="OS-MS-theten_' + (thehundred*10+7) +'" onclick="myQuestion(' + (thehundred*10+7) + ')">' + (thehundred*10+7) + '</a>';
+                    if(decades >= thehundred*10+8) dstr = dstr + '<a class="OS-MS-theten" id="OS-MS-theten_' + (thehundred*10+8) +'" onclick="myQuestion(' + (thehundred*10+8) + ')">' + (thehundred*10+8) + '</a>';
+                    if(decades >= thehundred*10+9) dstr = dstr + '<a class="OS-MS-theten" id="OS-MS-theten_' + (thehundred*10+9) +'" onclick="myQuestion(' + (thehundred*10+9) + ')">' + (thehundred*10+9) + '</a>';
+                    if(decades >= thehundred*10+10) dstr = dstr + '<a class="OS-MS-theten" id="OS-MS-theten_' + (thehundred*10+10) +'" onclick="myQuestion(' + (thehundred*10+10) + ')">' + (thehundred*10+10) + '</a>';
+                    if(decades == thehundred*10+11) dstr = dstr + '<a class="OS-MS-theten" onclick="myQuestion(' + (thehundred*10+11) + ')">next</a>';
+                    dstr = dstr + '</div>';
+                }
+                var set = pair[1].split('<>');
+                var Qs = '<div id="OS-myQuestions">';
+                for(var i=0; i<set.length; i++){
+                    var oneQ = set[i].split('|||');
+                    var qid = oneQ[0];
+                    var vno = oneQ[1];
+                    var book = oneQ[2];
+                    var chapter = oneQ[3];
+                    var verse = oneQ[4];
+                    var on = oneQ[5];
+                    on = on.replace(/-/g,'/');
+                    on = on.match(/^.{2}(.{8})/)[1];
+                    var body = oneQ[6];
+                    var rplNum = oneQ[7];
+                    var line = '<div class="OS-MyQuestion"><a onclick="jumpQuestion(\'' + book + '\',\'' + chapter + '\',\'' + verse + '\',\'' + vno + '\',\'' + qid + '\')">'
+                                    + '<span class="OS-on">' + on + '</span>'
+                                    + '<span class="OS-verse">' + book +" "+ chapter +":"+ verse + '</span>'
+                                    + '<span class="OS-MS-body">' + body + '</span>';
+                    if(rplNum == '0'){                
+                        line = line + '<span class="OS-rplNum">&nbsp;</span>' +
+                        '</a><img class="trash-can" src="/PublicBibleStudyNotebook/static/images/trash-can.png" title="delete this question"\ \
+                        onclick="deleteQuestion(\'' + book + '\',\'' + chapter + '\',\'' + verse + '\',\'' + vno + '\',\'' + qid + '\')">'; 
+                    }else{    
+                        line = line + '<span class="OS-rplNum">(+' + rplNum + ')</span>' +
+                        '</a><img  class="trash-can2" src="/PublicBibleStudyNotebook/static/images/trash-can2.png" title="can\'t delete because of reply messages">'; 
+                    }
+                        
+                    line = line +'</div>';
+                    Qs = Qs + line;
+                }
+                Qs = Qs + '</div>';
+                var org = $('#openSpace').html();
+                $('#openSpace').html(org+dstr+Qs);
+                $('#OS-MS-theten_'+ theten).css("font-weight","bold").css("border","2px solid #08C");
+            }
+        }
+	);
+}
+
+
+var getMyReplyJS = "{{=URL('getMyReply')}}"; 
+function myReply(theten){
+    if(typeof theten === 'undefined') theten=1;
+    //alert(theten);
+    openSpace("My Replys");
+    jQuery.post(getMyReplyJS,        
+		{theten:theten},
+        function(data){
+            //alert(data);
+            if(data == 'no_reply'){
+                var str = '<div id="OS-noReply">no reply</div>';
+                var org = $('#openSpace').html();
+                $('#openSpace').html(org+str);
+            }else{
+                var pair = data.split('$$$');
+                var decades = pair[0];
+                //alert(decades);
+                var dstr = "";
+                var thehundred = Math.floor((theten-1)/10);
+                //alert(theten+":"+thehundred);
+                if(decades > thehundred*10+11){
+                    dstr = '<div class="OS-decades">';
+                    if(thehundred >= 1) dstr = dstr + '<a class="OS-MR-theten" onclick="myReply(' + (thehundred*10) + ')">prev</a>';
+                    dstr = dstr + 
+                               '<a class="OS-MR-theten" id="OS-MR-theten_' + (thehundred*10+1) +'" onclick="myReply(' + (thehundred*10+1) + ')">' + (thehundred*10+1) + '</a>\
+                                <a class="OS-MR-theten" id="OS-MR-theten_' + (thehundred*10+2) +'" onclick="myReply(' + (thehundred*10+2) + ')">' + (thehundred*10+2) + '</a>\
+                                <a class="OS-MR-theten" id="OS-MR-theten_' + (thehundred*10+3) +'" onclick="myReply(' + (thehundred*10+3) + ')">' + (thehundred*10+3) + '</a>\
+                                <a class="OS-MR-theten" id="OS-MR-theten_' + (thehundred*10+4) +'" onclick="myReply(' + (thehundred*10+4) + ')">' + (thehundred*10+4) + '</a>\
+                                <a class="OS-MR-theten" id="OS-MR-theten_' + (thehundred*10+5) +'" onclick="myReply(' + (thehundred*10+5) + ')">' + (thehundred*10+5) + '</a>\
+                                <a class="OS-MR-theten" id="OS-MR-theten_' + (thehundred*10+6) +'" onclick="myReply(' + (thehundred*10+6) + ')">' + (thehundred*10+6) + '</a>\
+                                <a class="OS-MR-theten" id="OS-MR-theten_' + (thehundred*10+7) +'" onclick="myReply(' + (thehundred*10+7) + ')">' + (thehundred*10+7) + '</a>\
+                                <a class="OS-MR-theten" id="OS-MR-theten_' + (thehundred*10+8) +'" onclick="myReply(' + (thehundred*10+8) + ')">' + (thehundred*10+8) + '</a>\
+                                <a class="OS-MR-theten" id="OS-MR-theten_' + (thehundred*10+9) +'" onclick="myReply(' + (thehundred*10+9) + ')">' + (thehundred*10+9) + '</a>\
+                                <a class="OS-MR-theten" id="OS-MR-theten_' + (thehundred*10+10) +'" onclick="myReply(' + (thehundred*10+10) + ')">' + (thehundred*10+10) + '</a>\
+                                <a class="OS-MR-theten" onclick="myReply(' + (thehundred*10+11) + ')">next</a>';
+                    dstr = dstr + '</div>';
+                }else{
+                    dstr = '<div class="OS-decades">';
+                    if(thehundred >= 1) dstr = dstr + '<a class="OS-MR-theten" onclick="myReply(' + (thehundred*10) + ')">prev</a>';
+                    if(decades >= thehundred*10+1) dstr = dstr + '<a class="OS-MR-theten" id="OS-MR-theten_' + (thehundred*10+1) +'" onclick="myReply(' + (thehundred*10+1) + ')">' + (thehundred*10+1) + '</a>';
+                    if(decades >= thehundred*10+2) dstr = dstr + '<a class="OS-MR-theten" id="OS-MR-theten_' + (thehundred*10+2) +'" onclick="myReply(' + (thehundred*10+2) + ')">' + (thehundred*10+2) + '</a>';
+                    if(decades >= thehundred*10+3) dstr = dstr + '<a class="OS-MR-theten" id="OS-MR-theten_' + (thehundred*10+3) +'" onclick="myReply(' + (thehundred*10+3) + ')">' + (thehundred*10+3) + '</a>';
+                    if(decades >= thehundred*10+4) dstr = dstr + '<a class="OS-MR-theten" id="OS-MR-theten_' + (thehundred*10+4) +'" onclick="myReply(' + (thehundred*10+4) + ')">' + (thehundred*10+4) + '</a>';
+                    if(decades >= thehundred*10+5) dstr = dstr + '<a class="OS-MR-theten" id="OS-MR-theten_' + (thehundred*10+5) +'" onclick="myReply(' + (thehundred*10+5) + ')">' + (thehundred*10+5) + '</a>';
+                    if(decades >= thehundred*10+6) dstr = dstr + '<a class="OS-MR-theten" id="OS-MR-theten_' + (thehundred*10+6) +'" onclick="myReply(' + (thehundred*10+6) + ')">' + (thehundred*10+6) + '</a>';
+                    if(decades >= thehundred*10+7) dstr = dstr + '<a class="OS-MR-theten" id="OS-MR-theten_' + (thehundred*10+7) +'" onclick="myReply(' + (thehundred*10+7) + ')">' + (thehundred*10+7) + '</a>';
+                    if(decades >= thehundred*10+8) dstr = dstr + '<a class="OS-MR-theten" id="OS-MR-theten_' + (thehundred*10+8) +'" onclick="myReply(' + (thehundred*10+8) + ')">' + (thehundred*10+8) + '</a>';
+                    if(decades >= thehundred*10+9) dstr = dstr + '<a class="OS-MR-theten" id="OS-MR-theten_' + (thehundred*10+9) +'" onclick="myReply(' + (thehundred*10+9) + ')">' + (thehundred*10+9) + '</a>';
+                    if(decades >= thehundred*10+10) dstr = dstr + '<a class="OS-MR-theten" id="OS-MR-theten_' + (thehundred*10+10) +'" onclick="myReply(' + (thehundred*10+10) + ')">' + (thehundred*10+10) + '</a>';
+                    if(decades == thehundred*10+11) dstr = dstr + '<a class="OS-MR-theten" onclick="myReply(' + (thehundred*10+11) + ')">next</a>';
+                    dstr = dstr + '</div>';
+                }
+                var set = pair[1].split('<>');
+                var Rs = '<div id="OS-myReplys">';
+                for(var i=0; i<set.length; i++){
+                    var oneR = set[i].split('|||');
+                    var rid = oneR[0];
+                    var qid = oneR[1];
+                    var vno = oneR[2];
+                    var book = oneR[3];
+                    var chapter = oneR[4];
+                    var verse = oneR[5];
+                    var on = oneR[6];
+                    on = on.replace(/-/g,'/');
+                    on = on.match(/^.{2}(.{8})/)[1];
+                    var body = oneR[7];
+                    var line = '<div class="OS-MyReply"><a onclick="jumpReply(\'' + book + '\',\'' + chapter + '\',\'' + verse + '\',\'' + vno + '\',\'' +  qid + '\',\'' + rid + '\')">'
+                                    + '<span class="OS-on">' + on + '</span>'
+                                    + '<span class="OS-verse">' + book +" "+ chapter +":"+ verse + '</span>'
+                                    + '<span class="OS-MR-body">' + body + '</span>\
+                                      </a><img class="trash-can" src="/PublicBibleStudyNotebook/static/images/trash-can.png" title="delete this reply message" \
+                                      onclick="deleteReply(\'' + book + '\',\'' + chapter + '\',\'' + verse + '\',\'' + vno + '\',\'' + rid + '\')">\
+                               </div>';
+                    Rs = Rs + line;
+                }
+                Rs = Rs + '</div>';
+                var org = $('#openSpace').html();
+                $('#openSpace').html(org+dstr+Rs);
+                $('#OS-MR-theten_'+ theten).css("font-weight","bold").css("border","2px solid #08C");
+            }
+        }
+	);
+}
+
+var getRcQuestonJS = "{{=URL('getRcQueston')}}"; 
+function recentQuestions(question_no, nav){
+    if(typeof question_no === 'undefined') {
+        question_no = -1;
+        openSpace("Recent Questions");
+    }    
+    if(typeof nav === 'undefined') var nav = 'next';
+    
+    jQuery.post(getRcQuestonJS,        
+		{nav:nav, question_no:question_no},
+        function(data){
+            //alert(data);
+            if(data == 'latest'){
+                alert("This is the latest question.");
+            }else if(data == 'last'){
+                alert("This is the last question.");
+            }else{
+                set = data.split('|||');
+                var vno = set[0];
+                var on = set[1];
+                on = on.replace(/-/g,'/');
+                on = on.replace(/\s/,'&ensp;');
+                on = on.match(/^.{2}(.+).{10}$/)[1];
+                var by = set[2];
+                var book = set[3];
+                var fbook = set[4];
+                var chapter = set[5];
+                var verse = set[6];
+                var text = set[7];
+                var rplNum = set[8];
+                var body  = set[9];
+                var qid  = set[10];
+                var question_no = set[11];
+                
+                var area = '<div id="OS-RQ-contents">\
+                               <div class="OS-RQ-nav">\
+                                    <a class="OS-RQ-navItem" onclick="recentQuestions(' + question_no + ', \'prev\')">prev</a>\
+                                    <a class="OS-RQ-navItem" onclick="recentQuestions(' + question_no + ', \'next\')">next</a></div>\
+                               <div class="OS-RQ-verse"><a onclick="jumpQuestion(\'' + book + '\',\'' + chapter + '\',\'' + verse + '\',\'' + vno + '\',\'' + qid + '\')">' + fbook +" "+ chapter +":"+ verse + '</a></div>\
+                               <div class="OS-RQ-text">' + text  + '</div>\
+                               <div class="OS-RQ-header">' + '<div class="OS-RQ-by">'+by+'</div>' + '&ensp;(' + on + ')</div>';
+                if(rplNum == '0'){
+                    area = area + '<div class="OS-RQ-header2">This question has <span style="color:#08C;">no reply</span> message yet.';
+                }else{
+                    area = area + '<div>This question has <span style="color:#08C;">' + rplNum + '</span> reply messages.';
+                }
+                var open = "yes";
+                area = area + '<span class="OS-RQ-reply" onclick="jumpQuestion(\'' + book + '\',\'' + chapter + '\',\'' + verse + '\',\'' + vno + '\',\'' + qid + '\',\'' + open + '\')">reply to this question.</div><div class="OS-RQ-body">' + body + '</span></div>' + '</div>';
+                               
+                var header = '<div id="OS-header"><div id="OS-title">Recent Questions\
+                </div><div id="OS-close" onclick="closeSpace()">close<span id="OS-closeIcon"> &times;</span></div></div>'; 
+                    $('#openSpace').html(header+area);
+            }            
+        }    
+	);
+}
+
+function donation(){
+    openSpace("Donation");
+    var exp = 
+    '<div style="font-family:Roboto; padding:2% 5% 2% 5%; margin:2% 5% 2% 5%; border:1px solid #08C;">\
+        BibleNuts.com\'s purpose is the<br><strong> "infiltration of God\'s word in the world"</strong>.<br><br>\
+        This project needs your support to be able to accept many Bible learners. \
+       Your support will be used for<br>\
+        &nbsp;- internet hosting(daily cost of hosting which the web site uses)<br>\
+        &nbsp;- maintenance(sustainig the web site)<br>\
+        &nbsp;- development(improving the web site)<br><br>\
+        Please support this project. \
+        You can make a one-off donation or a recurring(Monthly) donation.\
+        When you chose to make a recurring donation, your support will continue until you cancel it. \
+        The way to cancel a recurring donation is below the "donate" button.<br><br>';
+    
+    var str =     
+    '<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">\
+    <input type="hidden" name="cmd" value="_s-xclick">\
+    <input type="hidden" name="hosted_button_id" value="3CFJAHEKSK5TA">\
+    <input type="image" src="https://www.paypalobjects.com/en_US/GB/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal ? The safer, easier way to pay online.">\
+    <img alt="" border="0" src="https://www.paypalobjects.com/en_GB/i/scr/pixel.gif" width="1" height="1">\
+    </form>\
+        Cancelling a subscription cancels all future scheduled payments of that subscription. A subscription can be cancelled up until the day of the next scheduled payment.<br><br>\
+    <strong>[ How to cancel a recurring donation made through a paypal account ]</strong><br>\
+    1. Log in to your PayPal account. <br>\
+    2. Click <strong>Profile</strong> near the top of the page. <br>\
+    3. Click <strong>My money</strong>. <br>\
+    4. Click <strong>Update</strong> in the <strong>My preapproved payments</strong> section. <br>\
+    5. Click <strong>Cancel</strong>, <strong>Cancel automatic billing</strong>, or <strong>Cancel subscription</strong> and follow the instructions. <br>\
+    <a href="https://www.paypal.com/webapps/helpcenter/article/?articleID=94044&m=SRE#canceling_recurring_paymemt_subscription_automatic_billing">\
+    Canceling a recurring payment, subscription or automatic billing agreement</a><br><br>\
+    <strong>[ How to cancel a recurring donation made by credit card ]</strong><br>\
+    Please send email to <strong>info.pbsn@gmail.com</strong> with..<br>\
+    - <strong>Title</strong>: Canceling a recurring payment<br>\
+    - <strong>Your Name</strong><br>\
+    - <strong>Your Email Address</strong>: This is the email address you used when you set up the donation.<br>\
+    - <strong>Profile ID</strong>: This is on the email message automatically sent from PayPal when you set up the donation.<br>\
+    </div>';
+    var org = $('#openSpace').html();
+    $('#openSpace').html(org+exp+str);
+}
+
+function about(){
+    openSpace('<span style="position:relative; left:-20%;">About BibleNuts.com</span>');
+    var about = '<div style="font-family:Roboto; padding:2% 5% 2% 5%; margin:2% 5% 2% 5%; border:1px solid #08C;">\
+    About 2000 years ago, Jesus told the people of Israel:<br>\
+    <strong style="color:#08C;">[ Luk 12:57 ] Yea, and why even of yourselves judge ye not what is right?</strong><br><br>\
+    Unfortunately the majority of the Jewish people did not judge what is right by themselves and did not realize \
+    that Jesus is the Christ and Son of God. Instead most of the people believed the wrong teaching of the \
+    religious authorities and finally crucified him by the hands of the Romans. \
+    Are we to think that judging what is right by themselves, as Jesus asked, was too difficult to do? I don\'t think so. \
+    I believe he asked them because he reckoned that each of them had the ability to do so. \
+    The Bible records a group of people who tried to judge what is right by themselves, and they were praised for doing so.<br>\
+    <strong style="color:#08C;">[ Act 17:11 ] These were more noble than those in Thessalonica, in that they received the word with all \
+    readiness of mind, and searched the scriptures daily, whether those things were so.</strong><br><br>\
+    What about nowadays? Since the liberation of the Bible following the Reformation, in western countries people have been able to get \
+    their own Bible. \
+    But do we really try to understand the Bible by ourselves? \
+    Sadly we have a tendency to swallow the teaching of church elders and not to search the scriptures to see whether their teaching is right. \
+    I am not proposing that we should not learn from elders of the church but reminding us that while we listen to elders\' teaching \
+    we still have to judge by ourselves.  The Bible is not an easy book to understand and we do need help to understand it as the following example from scripture shows.<br> \
+    <strong style="color:#08C;">[ Act 8:30-31 ] And Philip ran thither to him, and heard him read the prophet Esaias, and said, Understandest thou what thou readest? \
+    And he said, How can I, except some man should guide me? And he desired Philip that he would come up and sit with him. </strong><br><br>\
+    I launched this web site in Dec 2013 as an enviroment where those who want to learn the Bible can get together \
+    and freely discuss about each Bible verse. Through the two-way disscusion each user can be helped to judge by themselves and \
+    get a deeper understanding of the Bible. So that users would be focussed on the word of God, the web site was designed that a reply to a question \
+    must include at least one citation of a Bible verse.<br>\
+    <strong style="color:#08C;">[ Co1 2:13 ] Which things also we speak, not in the words which man\'s wisdom teacheth, but which the Holy Ghost teacheth; \
+    comparing spiritual things with spiritual. </strong><br><br>\
+    All questions and replies are open to the public because they will help other Bible readers to think about each Bible verse deeply. \
+    Therefore when you post a question or reply to a question, you contribute to the infiltration of God\'s word in the world \
+    and this <strong>"infiltration of God\'s word in the world"</strong> is the ultimate purpose of this project.<br>\
+    <strong style="color:#08C;">[ Isa 55:11 ] So shall my word be that goeth forth out of my mouth: it shall not return unto me void, \
+    but it shall accomplish that which I please, \
+    and it shall prosper in the thing whereto I sent it.</strong><br><br>\
+    Please join in this project!<br><br><br>\
+    Hiroshi Sasaki ( self employed web developer in Jesus Christ)';
+    var org = $('#openSpace').html();
+    $('#openSpace').html(org+about);
+}
+
+
+function privacy(){
+    openSpace("Privacy Policy");
+    var privacy = '<div style="font-family:Roboto; padding:2% 5% 2% 5%; margin:2% 5% 2% 5%; border:1px solid #08C;">\
+    <strong>What information do we collect?</strong> <br /><br />\
+    We collect information from you when you register on our site or fill out a form.  <br /><br />\
+    When ordering or registering on our site, as appropriate, you may be asked to enter your: \
+    name or e-mail address. You may, however, visit our site anonymously.<br /><br />\
+    <strong>What do we use your information for?</strong> <br /><br />\
+    Any of the information we collect from you may be used in one of the following ways: <br /><br />\
+    ; To personalize your experience<br />(your information helps us to better respond to your individual needs)<br /><br />\
+    ; To facilitate site users\' communication<br />(Your name may be visible to the site users when showing messages posted by site users.)<br /><br />\
+    ; To improve our website<br />(we continually strive to improve our website offerings based on the information and feedback we receive from you)<br /><br />\
+    ; To improve customer service<br />(your information helps us to more effectively respond to your customer service requests and support needs)<br /><br />\
+    ; To send emails<br />(The email address you provide may be used to send you information, respond to inquiries, and/or other requests or questions.)<br /><br />\
+    <strong>Do we use cookies?</strong> <br /><br />\
+    Yes (Cookies are small files that a site or its service provider transfers to your computers hard drive through your Web browser (if you allow) that enables the sites or service providers systems to recognize your browser and capture and remember certain information.<br /><br />\
+    <strong>Do we disclose any information to outside parties?</strong> <br /><br />We do not sell, trade, or otherwise transfer to outside parties your personally identifiable information. This does not include trusted third parties who assist us in operating our website, conducting our business, or servicing you, so long as those parties agree to keep this information confidential. We may also release your information when we believe release is appropriate to comply with the law, enforce our site policies, or protect ours or others rights, property, or safety. However, non-personally identifiable visitor information may be provided to other parties for marketing, advertising, or other uses.<br /><br /><strong>California Online Privacy Protection Act Compliance</strong><br /><br />Because we value your privacy we have taken the necessary precautions to be in compliance with the California Online Privacy Protection Act. We therefore will not distribute your personal information to outside parties without your consent.<br /><br />As part of the California Online Privacy Protection Act, all users of our site may make any changes to their information at anytime by logging into their control panel and going to the \'Profile\' page.<br /><br />\
+    <strong>Childrens Online Privacy Protection Act Compliance</strong> <br /><br />\
+    We are in compliance with the requirements of COPPA (Childrens Online Privacy Protection Act), \
+    we do not collect any information from anyone under 13 years of age. \
+    Our website, products and services are all directed to people who are at least 13 years old or older. \
+    If you become aware that your child under 13 has provided us with personal information without your consent, please contact us at info.pbsn@gmail.com.\
+    once we become aware that anyone under 13 has provided us with personal information, we will attempt to delete such information.<br /><br />\
+    <strong>Online Privacy Policy Only</strong> <br /><br />This online privacy policy applies only to information collected through our website and not to information collected offline.<br /><br /><strong>Your Consent</strong> <br /><br />By using our site, you consent to our <a style=\'text-decoration:none; color:#3C3C3C;\' href=\'http://www.freeprivacypolicy.com/\' target=\'_blank\'>websites privacy policy</a>.<br /><br /><strong>Changes to our Privacy Policy</strong> <br /><br />If we decide to change our privacy policy, we will post those changes on this page. <br /><br />This policy was last modified on 2013/12/12<br /><br /><strong>Contacting Us</strong> <br /><br />If there are any questions regarding this privacy policy you may contact us using the information below. <br /><br />info.pbsn@gmail.com<br /><br /><span></span><span></span>This policy is powered by Free Privacy Policy and Rhino Support <a rel=\'nofollow\' style=\'color:#000; text-decoration:none;\' href=\'http://www.rhinosupport.com\' target=\'_blank\'>help desk software</a>.<span></span><span></span><span></span>';
+    var org = $('#openSpace').html();
+    $('#openSpace').html(org+privacy);
+}
+function openSpace(title){
+    $('#Bible').css('height','43%');
+    $('#openSpace').css('height','52.7%').css("border-top","1px solid #ddd");
+    var header = '<div id="OS-header"><div id="OS-title">' + title + 
+    '</div><div id="OS-close" onclick="closeSpace()">close<span id="OS-closeIcon"> &times;</span></div></div>'; 
+    $('#openSpace').html(header);
+    
+}
+
+function closeSpace(){
+    $('#openSpace').html("");
+    $('#openSpace').css('height','0%').css("border-top","0px solid #fff");
+    $('#Bible').css('height','100%');
+}
+</script>
+
+<script>
+var deleteQuestionJS = "{{=URL('deleteQuestion')}}"; 
+function deleteQuestion(book,chapter,verse,vno,qid){
+	if(window.confirm('Are you sure to delete this question?')){
+        jQuery.post(deleteQuestionJS,        
+            {qid:qid},
+            function(){
+                myQuestion();
+                selectVerse(book,chapter,verse,vno);
+            }
+        );
+	}
+}
+
+var deleteReplyJS = "{{=URL('deleteReply')}}"; 
+function deleteReply(book,chapter,verse,vno,rid){
+	if(window.confirm('Are you sure to delete this reply message?')){
+        jQuery.post(deleteReplyJS,        
+            {rid:rid},
+            function(){
+                myReply();
+                selectVerse(book,chapter,verse,vno);
+            }
+        );
+	}
+}
+</script>
+
+<script>
+function jumpQuestion(book,chapter,verse,vno,qid,open){
+    if(typeof open !== 'undefined') {
+        {{if login=='No':}}
+        alert('$('#Bible').attr({'src':book + '.html#vid_' + vno});Please login to reply this question.');
+        return;
+        {{pass}}
+    }
+    //alert(open);
+    //alert(book+":"+vno+":"+qid);
+    var activeNo = $('#activeNo').val();    
+    if (activeNo != ""){$('#Bible').contents().find('#vid_'+activeNo).removeClass('selected');}
+    
+    var rid;
+    selectVerse(book,chapter,verse,vno,qid,rid,open);         
+    $('#Bible').load(function(){
+        activeNo = $('#activeNo').val();
+        $('#Bible').contents().find('#vid_'+activeNo).addClass('selected');     
+	});    
+}
+function jumpReply(book,chapter,verse,vno,qid,rid){
+    //alert(book+":"+vno+":"+qid);
+    var activeNo = $('#activeNo').val();    
+    if (activeNo != ""){$('#Bible').contents().find('#vid_'+activeNo).removeClass('selected');}
+    $('#Bible').attr({'src':book + '.html#vid_' + vno});
+    selectVerse(book,chapter,verse,vno,qid,rid);
+    $('#Bible').load(function(){
+        activeNo = $('#activeNo').val();
+        $('#Bible').contents().find('#vid_'+activeNo).addClass('selected');     
+	});    
+}
+
+</script>
+
+
+<script>
+function import_kjv(k){
+    var importKJV_JS = "{{=URL('importKJV')}}"; 
+    //alert("kuru");
+    if(typeof k === 'undefined') k=0;
+    //alert(k);
+    jQuery.post(importKJV_JS,        
+        {k:k},
+        function(data){
+            if(data!='finish'){
+                k = data
+                import_kjv(k)
+            }else{
+                alert("finish");
+            }            
+        }
+    );   
+}
+</script>

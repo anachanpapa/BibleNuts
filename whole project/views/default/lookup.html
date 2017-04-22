@@ -1,0 +1,97 @@
+{{extend 'playout.html'}}
+
+<div id="lookupBible"></div>
+
+<script>
+var book_no = window.opener.document.getElementById('book_no').value;
+//alert(book_no);
+var pair = book_no.split(':');
+var book = pair[0];
+var no = pair[1];
+$("#lookupBible").load(book+ "_2.html",function() {
+    location.href = "#vid_" + no;
+    $('#vid_'+no).addClass('selected');
+});
+</script>
+
+<script>
+var books = {
+'Gen':'Genesis',
+'Exo':'Exodus',
+'Lev':'Leviticus',
+'Num':'Numbers',
+'Deu':'Deuteronomy',
+'Jos':'Joshua',
+'Jdg':'Judges',
+'Rut':'Ruth',
+'Sa1':'1 Samuel',
+'Sa2':'2 Samuel',
+'Kg1':'1 Kings',
+'Kg2':'2 Kings',
+'Ch1':'1 Chronicles',
+'Ch2':'2 Chronicles',
+'Ezr':'Ezra',
+'Neh':'Nehemiah',
+'Est':'Esther',
+'Job':'Job',
+'Psa':'Psalm',
+'Pro':'Proverbs',
+'Ecc':'Ecclesiastes',
+'Sol':'Song of Solomon',
+'Isa':'Isaiah',
+'Jer':'Jeremiah',
+'Lam':'Lamentations',
+'Eze':'Ezekiel',
+'Dan':'Daniel',
+'Hos':'Hosea',
+'Joe':'Joel',
+'Amo':'Amos',
+'Oba':'Obadiah',
+'Jon':'Jonah',
+'Mic':'Micah',
+'Nah':'Nahum',
+'Hab':'Habakkuk',
+'Zep':'Zephaniah',
+'Hag':'Haggai',
+'Zac':'Zechariah',
+'Mal':'Malachi ',
+'Mat':'Matthew',
+'Mar':'Mark',
+'Luk':'Luke',
+'Joh':'John',
+'Act':'Acts',
+'Rom':'Romans',
+'Co1':'1 Corinthians',
+'Co2':'2 Corinthians',
+'Gal':'Galatians',
+'Eph':'Ephesians',
+'Phi':'Philippians',
+'Col':'Colossians',
+'Th1':'1 Thessalonians',
+'Th2':'2 Thessalonians',
+'Ti1':'1 Timothy',
+'Ti2':'2 Timothy',
+'Tit':'Titus',
+'Plm':'Philemon',
+'Heb':'Hebrews',
+'Jam':'James',
+'Pe1':'1 Peter',
+'Pe2':'2 Peter',
+'Jo1':'1 John',
+'Jo2':'2 John',
+'Jo3':'3 John',
+'Jde':'Jude',
+'Rev':'Revelation'};  
+</script>
+
+<style type="text/css">
+<!--
+@media only screen and (max-width : 800px) { 
+html{font-size:11px;}
+}
+@media only screen and (min-width : 800px) { 
+html{font-size:14px;}
+} 
+.bibleText{font-size:1.2em;}
+-->
+</style>

@@ -1,0 +1,785 @@
+@media only screen and (max-width : 1600px) { 
+html{font-size:11px;}
+#search {height: 16px !important; line-height: 16px !important; background-size:10px !important; font-size:1em !important; }
+#searchButton{height: 18px !important; font-size:0.9em !important; line-height:0.9em !important;}
+.PastQA_login{height:73%;} 
+.PastQA_logout{height:87.5%;}
+.RpostBody   {height:60px;}
+#biblia_img{width:71px;}
+#Question{height:18%;}
+.postBodyWrap {position:relative; top:0.28em; width: 100%; height:45%;}
+#poweredBy {text-align: right; height:23px; overflow-y:hidden;}
+#footer{height:23px;}
+}
+@media only screen and (min-width : 1600px) { 
+html{font-size:14px;}
+#search {height: 22px !important; line-height: 22px !important; background-size:15px !important; font-size:1em !important; }
+#searchButton{height: 24px !important; font-size:0.9em !important; line-height:0.9em !important;}
+.PastQA_login{height:77%;} 
+.PastQA_logout{height:90.5%;}
+.RpostBody   {height:80px;}
+#biblia_img{width:90px;}
+#Question{height:18%;}
+.postBodyWrap {position:relative; top:0.28em; width: 100%; height:55%;}
+#poweredBy {text-align: right; height:30px; overflow-y:hidden;}
+#footer{height:30px;}
+} 
+
+/** these MUST stay **/
+a {text-decoration:none; white-space:nowrap}
+a:hover {text-decoration:underline}
+a.button {text-decoration:none}
+h1,h2,h3,h4,h5,h6 {margin:0.5em 0 0.25em 0; display:block;
+  font-family:Helvetica}
+h1 {font-size:4.00em}
+h2 {font-size:3.00em}
+h3 {font-size:2.00em}
+h4 {font-size:1.50em}
+h5 {font-size:1.25em}
+h6 {font-size:1.12em}
+th,label {font-weight:bold; white-space:nowrap;}
+td,th {text-align:left; padding:2px 5px 2px 5px}
+th {vertical-align:middle; border-right:1px solid white}
+td {vertical-align:top}
+form table tr td label {text-align:left}
+p,table,ol,ul {padding:0; margin: 0.75em 0}
+p {text-align:justify}
+ol, ul {list-style-position:outside; margin-left:2em}
+li {margin-bottom:0.5em}
+span,input,select,textarea,button,label,a {display:inline}
+img {border:0}
+blockquote,blockquote p,p blockquote {
+  font-style:italic; margin:0.5em 30px 0.5em 30px; font-size:0.9em}
+i,em {font-style:italic}
+strong {font-weight:bold}
+small {font-size:0.8em}
+code {font-family:Courier}
+textarea {width:100%}
+video {width:400px}
+audio {width:200px}
+input[type=text],input[type=password],select{width:300px; margin-right:5px}
+.hidden {display:none;visibility:visible}
+.right {float:right; text-align:right}
+.left {float:left; text-align:left}
+.center {width:100; text-align:center; vertical-align:middle}
+/** end **/
+
+/* Sticky footer begin */
+
+.footer,.push {
+  clear:both;
+}
+
+.footer-content {width:100%}
+
+.auth_navbar {
+    white-space:nowrap;
+}
+
+/* Sticky footer end */
+
+
+.header {
+	/* background:<fill here for header image>; */
+}
+
+
+fieldset {padding:16px; border-top:1px #DEDEDE solid}
+fieldset legend {text-transform:uppercase; font-weight:bold; padding:4px 16px 4px 16px; background:#f1f1f1}
+
+/* fix ie problem with menu */
+
+td.w2p_fw {padding-bottom:1px}
+td.w2p_fl,td.w2p_fw,td.w2p_fc {vertical-align:top}
+td.w2p_fl {text-align:left}
+td.w2p_fl, td.w2p_fw {padding-right:7px}
+td.w2p_fl,td.w2p_fc {padding-top:4px}
+div.w2p_export_menu {margin:5px 0}
+div.w2p_export_menu a, div.w2p_wiki_tags a, div.w2p_cloud a {margin-left:5px; padding:2px 5px; background-color:#f1f1f1; border-radius:5px; -moz-border-radius:5px; -webkit-border-radius:5px;}
+
+/* tr#submit_record__row {border-top:1px solid #E5E5E5} */
+#submit_record__row td {padding-top:.5em}
+
+/* Fix */
+#auth_user_remember__row label {display:inline}
+#web2py_user_form td {vertical-align:top}
+
+/*********** web2py specific ***********/
+div.flash {
+    font-weight:bold;
+    display:none;
+    position:fixed;
+    padding:10px;
+    top:48px;
+    right:50px;
+    min-width:280px;
+    opacity:0.95;
+    margin:0px 0px 10px 10px;
+    vertical-align:middle;
+    cursor:pointer;
+    color:#fff;
+    background-color:#000;
+    border:2px solid #fff;
+    border-radius:8px;
+    -o-border-radius: 8px;
+    -moz-border-radius:8px;
+    -webkit-border-radius:8px;
+    background-image: -webkit-linear-gradient(top,#222,#000);
+    background-image: -o-linear-gradient(top,#222,#000);
+    background-image: -moz-linear-gradient(90deg, #222, #000);
+    background-image: linear-gradient(top,#222,#000);
+    background-repeat: repeat-x;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    z-index:2000;
+}
+
+div.flash #closeflash{color:inherit; float:right; margin-left:15px;}
+.ie-lte7  div.flash #closeflash
+{color:expression(this.parentNode.currentStyle['color']);float:none;position:absolute;right:4px;}
+
+div.flash:hover { opacity:0.25; }
+
+div.error_wrapper {display:block}
+div.error {
+    width: 298px;
+    background:red;
+    border: 2px solid #d00;
+    color:white;
+    padding:5px;
+    display:inline-block;
+    background-image: -webkit-linear-gradient(left,#f00,#fdd);
+    background-image: -o-linear-gradient(left,#f00,#fdd);
+    background-image: -moz-linear-gradient(0deg, #f00, #fdd);
+    background-image: linear-gradient(left,#f00,#fdd);
+    background-repeat: repeat-y;
+}
+
+.topbar {
+    padding:10px 0;
+    width:100%;
+    color:#959595;
+    vertical-align:middle;
+    padding:auto;
+    background-image:-khtml-gradient(linear,left top,left bottom,from(#333333),to(#222222));
+    background-image:-moz-linear-gradient(top,#333333,#222222);
+    background-image:-ms-linear-gradient(top,#333333,#222222);
+    background-image:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#333333),color-stop(100%,#222222));
+    background-image:-webkit-linear-gradient(top,#333333,#222222);
+    background-image:-o-linear-gradient(top,#333333,#222222);
+    background-image:linear-gradient(top,#333333,#222222);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#333333',endColorstr='#222222',GradientType=0);
+    -webkit-box-shadow:0 1px 3px rgba(0,0,0,0.25),inset 0 -1px 0 rgba(0,0,0,0.1);
+    -moz-box-shadow:0 1px 3px rgba(0,0,0,0.25),inset 0 -1px 0 rgba(0,0,0,0.1);
+    box-shadow:0 1px 3px rgba(0,0,0,0.25),inset 0 -1px 0 rgba(0,0,0,0.1);
+}
+
+.topbar a {
+    color:#e1e1e1;
+}
+
+#navbar {float:right; padding:5px; /* same as superfish */}
+
+.statusbar {
+    background-color:#F5F5F5;
+    margin-top:1em;
+    margin-bottom:1em;
+    padding:.5em 1em;
+    border:1px solid #ddd;
+    border-radius:5px;
+    -moz-border-radius:5px;
+    -webkit-border-radius:5px;
+}
+
+.breadcrumbs {float:left}
+
+.copyright {position:relative; top:0.7em; float:left}
+
+/* #MEDIA QUERIES SECTION */
+
+/*
+*Grid
+*
+* The default style for SQLFORM.grid even using jquery-iu or another ui framework
+* will look better with the declarations below
+* if needed to remove base.css consider keeping these following lines in some css file.
+*/
+/* .web2py_table {border:1px solid #ccc} */
+.web2py_paginator {}
+.web2py_grid {width:100%}
+.web2py_grid table {width:100%}
+.web2py_grid tbody td {padding:2px 5px 2px 5px; vertical-align: middle;}
+
+.web2py_grid thead th,.web2py_grid tfoot td {
+    background-color:#EAEAEA;
+    padding:10px 5px 10px 5px;
+}
+
+.web2py_grid tr.odd {background-color:#F9F9F9}
+.web2py_grid tr:hover {background-color:#F5F5F5}
+
+/*
+.web2py_breadcrumbs a {
+    line-height:20px; margin-right:5px; display:inline-block;
+    padding:3px 5px 3px 5px;
+    font-family:'lucida grande',tahoma,verdana,arial,sans-serif;
+    color:#3C3C3D;
+    text-shadow:1px 1px 0 #FFFFFF;
+    white-space:nowrap; overflow:visible; cursor:pointer;
+    background:#ECECEC;
+    border:1px solid #CACACA;
+    -webkit-border-radius:2px; -moz-border-radius:2px;
+    -webkit-background-clip:padding-box; border-radius:2px;
+    outline:none; position:relative; zoom:1; *display:inline;
+}
+*/
+
+.web2py_console form {
+    width: 100%;
+    display: inline;
+    vertical-align: middle;
+    margin: 0 0 0 5px;
+}
+
+.web2py_console form select {
+    margin:0;
+}
+
+.web2py_search_actions {
+    float:left;
+    text-align:left;
+}
+
+.web2py_grid .row_buttons {
+    min-height:25px;
+    vertical-align:middle;
+}
+.web2py_grid .row_buttons a {
+    margin:3px;
+}
+
+.web2py_search_actions {
+    width:100%;
+}
+
+.web2py_grid .row_buttons a,
+.web2py_paginator ul li a,
+.web2py_search_actions a,
+.web2py_console input[type=submit],
+.web2py_console input[type=button],
+.web2py_console button {
+    line-height:20px;
+    margin-right:2px; display:inline-block;
+    padding:3px 5px 3px 5px;
+}
+
+.web2py_counter {
+    margin-top:5px;
+    margin-right:2px;
+    width:35%;
+    float:right;
+    text-align:right;
+}
+
+/*Fix firefox problem*/
+.web2py_table {clear:both; display:block}
+
+.web2py_paginator {
+    padding:5px;
+    text-align:right;
+    background-color:#f2f2f2;
+
+}
+.web2py_paginator ul {
+    list-style-type:none;
+    margin:0px;
+    padding:0px;
+}
+
+.web2py_paginator ul li {
+    display:inline;
+}
+
+.web2py_paginator .current {
+    font-weight:bold;
+}
+
+.web2py_breadcrumbs ul {
+    list-style:none;
+    margin-bottom:18px;
+}
+
+li.w2p_grid_breadcrumb_elem {
+    display:inline-block;
+}
+
+.web2py_console form { vertical-align: middle; }
+.web2py_console input, .web2py_console select,
+.web2py_console a { margin: 2px; }
+
+
+#wiki_page_body {
+   width: 100%;
+   height: auto;
+   min-height: 400px;
+}
+
+/* fix some IE problems */
+
+.ie-lte7 .topbar .container {z-index:2}
+.ie-lte8 div.flash{ filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#222222', endColorstr='#000000', GradientType=0 ); }
+.ie-lte8 div.flash:hover {filter:alpha(opacity=25);}
+.ie9 #w2p_query_panel {padding-bottom:2px}
+
+html, body {height: 100%;}
+.container{height:96%;}
+#main{height: 96%;}
+
+#nav1_contents{position:relative; float:left; margin-left:2%; margin-right:3%;}
+.nav2{float:left; margin-right:3%; color:#ccc;line-height:25px;}
+.nav2:hover{color:#fff; text-decoration:none;}
+#bookSelect{width:160px; height:25px; background-color:#1b1b1b; color:#ccc; border:none; margin-bottom:0px; font-size:1em;}
+#bookSelect:focus{outline:none;}
+#bookSelect:hover{color:#fff;}
+
+#footer{position:absolute; width: 92%; bottom:0px;}
+.dropdown{margin-right: 30px;}
+
+.editable{border:1px solid #08C; padding: 5px 10px 8px 10px;}
+.editable:focus{outline: solid 2px 	#B5B6FF;}
+.inputlimitation:focus{outline: none; }
+.inputArea{min-width:1%;}   
+
+#leftHalf{
+    float:left;
+    width:48%;
+    margin-right: 1.5%;
+    height: 100%;
+}
+
+#Bible{
+    width:100%;
+    height: 43%;
+    overflow-y: scroll;
+    display:block;
+}
+
+#openSpace{
+    width:100%;
+    display:block;
+    margin-top:3%;
+    overflow-y: auto;
+}
+
+#OS-header{width:100%;margin-top:1%;height:7%}
+#OS-title{float:left; width:40%; margin-left:40%; color:#08C ;font-size:1.2em;}
+#OS-close{float:left; color:#222; font-size:1em; color:#08C; text-decoration:underline; cursor:pointer;}
+#OS-closeIcon{font-size:1em}
+.OS-decades{margin-bottom:1%; width:100%;text-align:center;}
+.OS-MS-theten, .OS-MR-theten{display:inline-block; width:4.5%; margin-right:1%; border:1px solid #ccc;cursor:pointer;}
+#OS-myQuestions, #OS-myReplys{clear:both; height:80%;}
+.OS-MyQuestion, .OS-MyReply{clear:both; margin-bottom:0.35em; height:7%; padding-top:0.43em;margin-left:10px;margin-right:10px;border-bottom:1px solid #ddd; overflow:hidden; cursor:pointer;}
+#OS-noQuestion, #OS-noReply{clear:both; height:80%;font-size:1.2em; margin-left:40%; color:#555; font-weight:lighter;}
+.OS-verse{float:left; width:11%;}
+.OS-on{float:left;  width:11%;}
+.OS-MS-body{float:left; width:66%; margin-right:2%; overflow-x:hidden;}
+.OS-MR-body{float:left; width:71%; margin-right:2%; overflow-x:hidden;}
+.OS-rplNum{float:left;width:5%;}
+#OS-RQ-contents{width:90%; margin: 0 auto; margin-bottom: 40px;}
+.OS-RQ-verse{margin-bottom:0.5%;}
+.OS-RQ-verse a{font-weight:bold; text-decoration:underline; cursor:pointer;}
+.OS-RQ-text{border: 2px #CECEFF solid; padding: 1% 2% 1% 2%; margin-bottom:3%;}
+.OS-RQ-header{float:left; width:37%;}
+.OS-RQ-by{float:left; max-width:60%; overflow-x: hidden;}
+.OS-RQ-header2{text-align:right;}
+.OS-RQ-body{border: 2px #BBB solid; padding: 1% 2% 1% 2%;}
+.OS-RQ-reply{color:#C96697; cursor:pointer; margin-left: 5%;}
+.OS-RQ-reply:hover{color:#A15279;}
+.OS-RQ-nav{margin-bottom:1%; width:100%;text-align:center;}
+.OS-RQ-navItem{display:inline-block; width:8%; margin-right:1%; border:1px solid #ccc;cursor:pointer;}
+.trash-can{width:1.05em;margin-left:2%; margin-bottom:2px; cursor:pointer;}
+.trash-can2{width:1.05em;margin-left:2%; margin-bottom:2px;}
+
+#searchBible{
+    float:left;
+    width:95%;
+    margin-top:2.14em;
+    height: 90%;
+    margin-left: 4%;
+    overflow-y: scroll;
+}
+
+#searchBook{}
+#lookupBible{
+    float:left;
+    width:95%;
+    margin-top:1%;
+    height: 98%;
+    margin-left: 4%;
+    overflow-y: scroll;
+}
+
+.oneVerse{
+    display: inline-block;  
+    clear:both;
+    width: 100%;
+    font-size:1em;
+    font-family: CharisSILRegular, Georgia, 'Times New Roman', Times, serif;
+    color: #555;
+    line-height:2em;
+    margin-bottom:0.3em;
+}
+
+.oneVerse:hover{
+    background-color:#F0F0BC;
+}
+
+.selected{
+    background-color:#DDDD7D;
+}
+
+.bibleNo{
+    display: inline-block;  
+    float: left;
+    width: 50px;
+}    
+
+.bibleBook{
+    display: inline-block;  
+    float: left;
+    width: 4.5%;
+    margin-left:2%;
+    font-family: 'Roboto', sans-serif;
+    color: #999;
+}    
+
+.bibleChapter{
+    display: inline-block;  
+    float: left;
+    width: 3%;
+    font-family: 'Roboto', sans-serif;
+    color: #999;
+}    
+.bibleVerse{
+    display: inline-block;  
+    float: left;
+    width: 3%;
+    font-family: 'Roboto', sans-serif; 
+    color: #999;
+}
+    
+.bibleText{
+    display: inline-block;  
+    float: left;
+    width: 86%;    
+}    
+
+#Study{
+    float:left;
+    width: 50.3%;
+    height: 100%;
+}
+
+#Selected{
+    width: 100%;
+    height: 2.15em;
+    font-size: 1.2em;
+    margin-top: 0.5%;
+    margin-left: 10px;
+    margin-bottom: -0.2em;
+    color: #777;
+}
+
+#Question{
+    width: 100%;
+    border-top:1px solid #E5E5E5;
+}
+
+#askLogin{
+    font-size: 1.2em;
+    margin-top: 0.7em;
+    margin-left: 10px;
+    color: #C96697;
+    text-decoration: underline;
+}
+
+#PastQA{
+    margin-top: 2%;
+    width: 100%;
+    overflow-y: scroll;     
+}
+ 
+.postLabel{
+    position: relative;
+    top: 0.2em;
+    left:10px;
+    width: 95%;
+    font-size: 1em;
+    color: #08C;
+}
+
+#selectBook{float:left; margin-right:10px; font-weight:bold;}
+#selectChapter{float:left;font-weight:bold;}
+#selectVerse{float:left;font-weight:bold;}
+
+#postBody   {
+    width: 97.4%;
+    height:100%;
+    overflow:auto;
+}
+
+#Qbuttons{margin-top:0.6%; height:20%;}
+#QsubmitButton{
+    height: 1.7em;
+    line-height:0.9em;
+    font-size:0.9em;
+    float: left;
+    margin-right: 15px;
+    color: #555;
+}    
+
+#QreferButton{
+    height: 1.7em;
+    line-height:0.9em;
+    font-size:0.9em;
+    float: left;
+    color: #555;
+}
+
+.RpostBodyWrap {
+    position:relative;
+    left:2px;
+    top:0.28em;
+    width: 96%;
+}
+
+.RpostBody   {
+    width: 98%;
+    border:1px solid #08C;
+    overflow:auto;
+}
+
+.infoArea{margin-top:0.7ex; color:#C96697;}
+blockquote{color:#C96697;}
+
+.Rsubmit{float:left; margin-top:0.8em; margin-bottom:1em;}
+.RsubmitButton{
+    height: 1.7em;
+    line-height:0.9em !important;
+    font-size:0.9em !important;
+    float: left;
+    margin-right: 15px;
+    color: #555;
+    margin-top: -2px;
+}    
+
+.Rrefer{float:left; margin-top:0.8em; margin-bottom:1em;}
+.RreferButton{
+    height: 1.7em;
+    line-height:0.9em !important;
+    font-size:0.9em !important;
+    float: left;
+    color: #555;
+    margin-top: -2px;
+}
+
+#comments{width: 100%;} 
+
+.oneQ{width: 100%; margin-bottom:3%;}
+.Qheader{
+    display: inline-block;
+    width:100%;
+    line-height:1.5em;
+    height:1.5em;
+    margin-bottom:0.7em;
+    background-color: #f1f1f1;
+    vertical-align:middle;
+    border-bottom:1px solid #E1E1E1;
+}
+.Qjumped{background-color: #CECEFF;}   
+.openQA{float:left; width: 80px; height:100%;}
+.downArrow{
+    position: relative;
+    top:0.5em;
+    left:10px;
+    margin-left:7px;
+    margin-right:10px;
+    float: left;
+    width: 0px;
+    height: 0px;
+    border-style: solid;
+    border-width: 8px 7px 0 7px;
+    border-color: #858585 transparent transparent transparent;
+    cursor: pointer;
+}
+
+.rightArrow{
+    position: relative;
+    top:0.3em;
+    left:10px;
+    margin-left:7px;
+    margin-right:10px;
+    float: left;
+    width: 0px;
+    height: 0px;
+    border-style: solid;
+    border-width: 7px 0 7px 8px;
+    border-color: transparent transparent transparent #858585;
+    cursor: pointer;
+}
+
+.Qby{float:left; width: 15%; margin-left:15px; font-size:0.9em; font-weight:bold; color:#666; overflow: hidden;}
+.Qinfo{float:left; width: 45%; margin-top:3px;}
+.Qon{float:left; width: 18%; color:#777;}
+.Qreply{float:left; width: 5%;}
+.Qbody,.Rbody{clear:both; width: 98%;}
+
+.RplImg{width: 1.57em; cursor:pointer;}
+.RplImg:active{position:relative; right:1px;}
+.QreplyForm,.RreplyForm{ margin-top:1.42em; margin-bottom: 0px;}
+
+#searchTitle{
+    float: left;
+    margin-left: 30px;
+    color: #c6cecc;
+    line-height:25px;
+}
+
+#referArrow{
+    float:left;
+    margin-right: 20px;
+    margin-top: 6px;
+    width: 0px;
+    height: 0px;
+    border-style: solid;
+    border-width: 7px 0 7px 12px;
+    border-color: transparent transparent transparent #dddddd;
+}
+
+#refered{
+    float: left;
+    margin-left: 20px;
+    margin-right: 15px;
+    font-size: 1.2em;
+    color: #ddd;
+    line-height:25px;    
+}
+#referBook{float:left; margin-right:10px; font-weight:bold;}
+#referChapter{float:left;font-weight:bold;}
+#referVerse{float:left;font-weight:bold;}
+#referAdd{float:left; margin-left: 20px;}
+#selectInform{float:left;margin-left:20px; font-weight:bold;}
+.referCode{margin-left:0.5ex; margin-right:0.5ex;}
+
+.oneR{width: 100%; margin-bottom:2%;}
+.Rheader{
+    display: inline-block;
+    width:100%;
+    line-height:1.5em;
+    height:1.5em;
+    margin-bottom:0.7em;
+    vertical-align:middle;
+    border-top:1px solid #E5E5E5;
+    border-bottom:1px solid #E5E5E5;
+}
+.Rspace{float:left; width: 80px; height:100%;}
+.Rby{float:left; width: 15%; margin-left:15px; font-size:0.9em; font-weight:bold; color:#666; overflow: hidden;}
+.Rinfo{float:left; width: 45%; margin-top:3px;}
+.Ron{float:left; width: 18%; color:#777;}
+
+.privacy_policy{position:relative; top:0.7em; float:left; margin-left:3%;}
+
+#searchForm{position:relative; left:5%; width: 60%;}
+#search { 
+	width:40% !important;
+	margin:0 auto !important;
+	padding:0px 80px 0px 30px !important;
+	margin:3px; 
+	background: url('/PublicBibleStudyNotebook/static/images/search.png') no-repeat 8px 5px; 
+    color:#555 !important;
+    border:1px solid #ccc !important;
+    border-radius:0 !important; 
+	-moz-border-radius:0 !important; 
+	-webkit-border-radius:0 !important; 
+}
+
+#search:focus{
+    box-shadow: none !important;
+    border:1px solid #ccc !important;
+}
+
+#searchButton{
+    position:relative !important;
+    left: -3px !important;
+    border:1px solid #ccc !important;
+    border-radius:0 !important; 
+	-moz-border-radius:0 !important; 
+	-webkit-border-radius:0 !important;
+    color: #555 !important;
+    outline:none !important;
+}
+
+#hitCount{
+    position:relative;
+    display:inline-block;
+    right:0px;
+    top:0.5em;
+    color: #555;
+    background-color: #EBECFF;
+    width: 90%;
+    padding-left:5%;
+}
+#hitCount2{
+    position:relative;
+    display:inline-block;
+    right:0px;
+    color: #555;
+    background-color: #EBECFF;
+    width: 90%;
+    padding-left:5%;
+}
+#searchResult{margin-top:1%; height:70%; overflow-y: auto; padding-top:0.7em; }
+#searchResult2{margin-top:-1.4em;}
+.oneResult{margin-bottom:2.8em;}
+.oneTitle{float:left; width:20%; color:#08C; cursor:pointer;}
+.oneText {display: inline-block; float:left; width:75%;margin-bottom:1.4em;}
+#loading{position:relative;top:20%;left:45%;width:10%;height:0;}
+.dropdown-toggle{line-height:25px;}
+
+
+.note {
+float:left; 
+position: relative;
+top:20px;
+left:60px; 
+font-size:24px;
+padding: 0.5em 1.5em;
+margin: 2em auto;
+color: #fff;
+background: #555fff;
+overflow: hidden;
+}
+.note.blue:before {
+border-color: #fff #fff #AAAFFF #AAAFFF;
+background: #AAAFFF;
+}
+
+.note:before {
+content: "";
+position: absolute;
+top: 0;
+right: 0;
+border-width: 0 16px 16px 0;
+border-style: solid;
+border-color: #fff #fff #658E15 #658E15;
+background: #658E15;
+display: block;
+width: 0;
+/* Optional: shadow; */
+-webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.3), -1px 1px 1px rgba(0,0,0,0.2);
+-moz-box-shadow: 0 1px 1px rgba(0,0,0,0.3), -1px 1px 1px rgba(0,0,0,0.2);
+box-shadow: 0 1px 1px rgba(0,0,0,0.3), -1px 1px 1px rgba(0,0,0,0.2);
+}
+
+#BN-youtube{border: 4px #ffffff solid;}
+#BN-youtube:hover{border: 4px #555fff solid;}

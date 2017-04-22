@@ -1,0 +1,307 @@
+{{extend 'slayout.html'}}
+<div style="position:relative; top:1em;">
+<form onsubmit="return false;" id="searchForm"><span>
+    <input type="text" id="search" placeholder='e.g. created "by him"'>
+    <input type="button" value="search" id="searchButton" class="btn" onclick="searchBible();">
+</span></form>
+</div>
+
+<div id="searchBible">
+    <div id="loading"></div>
+    <div id="hitCount2"></div>
+    <div id="searchResult2"></div>
+    <div id="searchBook"></div>
+</div>
+
+<script>
+function searchBible(){
+    var query = $("#search").val();
+    if(query == "") return;
+    $('#searchBook').html("")
+    $("#refered").html('');
+    $("#hitCount2").html("");
+    $('#searchResult2').html("");
+    $('#loading').html('<img src="/PublicBibleStudyNotebook/static/images/load.gif">');
+    if(query == "") return;
+    //alert(query);
+    var q = query.split('');
+    var query2 = "";
+    var quate_flag = 0;
+    for(var i = 0; i < q.length; i++){
+        if(q[i] == '\"') {
+            if(quate_flag == 0){
+                quate_flag = 1;
+            }else{
+                quate_flag = 0;
+            }
+        }else{
+            if(quate_flag == 1 && q[i] == ' '){ 
+                query2 += '$$$';
+            }else{
+                query2 += q[i];
+            }    
+        }
+    }
+    //alert(query2);
+    
+    var get_biblia_key = "{{=URL('get_biblia_key')}}"; 
+    $.get( get_biblia_key, function( biblia_key ) {
+        $.ajax({
+          type: 'GET',
+          url: 'http://api.biblia.com/v1/bible/search/KJV.js?query=' + query + '&mode=verse&sort=passage&start=0&limit=1000&key=' + biblia_key,
+          dataType: 'json',
+          success: function(json){
+            //alert(json.resultCount);
+            var org = $('#openSpace').html();
+            var hit = json.resultCount;
+            if(hit > 1000){
+                var hitcode = '1 - 1000 of all <span style="color:#08C;">' + json.resultCount + '</span> results';
+            }else{
+                var hitcode = '<span style="color:#08C;">' + json.resultCount + '</span> results';
+            }            
+            $('#hitCount2').html(hitcode);
+            var results = json.results;
+            var display = "";
+            for(var count in results){
+                var keywords = query2.split(' ');                
+                var title = results[count].title;
+                var text = results[count].preview;
+                for(var i=0; i < keywords.length; i++){
+                    keyword = keywords[i].replace(/\$\$\$/g,' ');
+                    //alert(keyword);
+                    text = text.replace(new RegExp("([^A-Za-z0-9_])" + keyword + "([^A-Za-z0-9_])", 'g'), "$1"+'<span style="color:#C96697;font-weight:bold">'+keyword+'</span>'+"$2");                 
+                }
+                display = display + '<div class="oneResult"><a class="oneTitle" onclick="selectVerse2(\'' + title + '\');">' + title + '</a><div class="oneText">' + text + '</div></div>'; 
+            }
+            $('#loading').html("");
+            $('#searchResult2').html(display);
+          }
+        });
+    });
+}
+</script>
+
+<script>
+var activeNo = "";
+function selectVerse(no){
+    //alert("kuru");   
+    if (activeNo != ""){
+        $('#vid_'+activeNo).removeClass('selected');     
+    }   
+    activeNo = no;
+    $('#vid_'+activeNo).addClass('selected');
+    var book = $('#vid_'+activeNo).find('.bibleBook').text()
+    var _book = books[book];
+    var chapter = $('#vid_'+activeNo).find('.bibleChapter').text()
+    var verse = $('#vid_'+activeNo).find('.bibleVerse').text()
+    var refered = '<div id="referArrow"></div><div id="referBook">' + _book + '</div><div id="referChapter">' + chapter + '&nbsp;:&nbsp;</div>\
+            <div id="referVerse">' + verse + '</div>\
+            <div id="referAdd"><button id="referAddButton" onclick="referAdd(\'' +activeNo+'\',\''+ book+'\',\''+chapter+'\',\''+verse+ '\')">select</button></div>'; 
+    //alert(refered);
+    $("#refered").html(refered);
+}
+
+function selectVerse2(title){
+    set = title.match(/^(.+?)\s(\d+):(\d+)$/);
+    var book = RegExp.$1;
+    var chapter = RegExp.$2;
+    var verse = RegExp.$3;
+    //alert(book+"-"+chapter+"-"+verse);
+    var _book = books2[book];
+    var getVno= "{{=URL('getVno')}}"; 
+    
+    jQuery.post(getVno,      
+        {book:book,chapter:chapter,verse:verse},
+        function(activeNo){
+            //alert(data);
+            var refered = '<div id="referArrow"></div><div id="referBook">' + book + '</div><div id="referChapter">' + chapter + '&nbsp;:&nbsp;</div>\
+                    <div id="referVerse">' + verse + '</div>\
+                    <div id="referAdd"><button id="referAddButton" onclick="referAdd(\'' +activeNo+'\',\''+ _book+'\',\''+chapter+'\',\''+verse+ '\')">select</button></div>'; 
+            //alert(refered);
+            $("#refered").html(refered);            
+        }
+    );    
+}  
+</script>
+
+<script>
+function chgBook(){
+    $("#hitCount2").html("");
+    $('#searchResult2').html("");
+    var selectBox = document.getElementById("bookSelect");
+    var book = selectBox.options[selectBox.selectedIndex].value;
+    $("#searchBook").load(book+"_2.html");
+}
+
+function referAdd(no,book,chapter,verse){
+    //alert(book + ":" + chapter + ":" + verse);
+    var refer = '&nbsp;<a class="referCode" href="#" onclick="lookup(\'' +book+'\',\''+no+'\')">' + book + ' ' + chapter + ':' + verse + '</a>&nbsp;';
+    var targetID = window.opener.document.getElementById('activeID').value;
+    var box = window.opener.document.getElementById(targetID);
+    var org = $(box).children('.inputArea').html();
+    $(box).children('.inputArea').html(org+refer);
+    $(box).children('.inputArea').focus();
+    var org = $("#referAdd").html();
+    var selectInform = '<span id="selectInform">selected</span>'
+    $("#referAdd").html(org+selectInform);
+    //window.close();
+}
+
+</script>
+
+<script>
+var books = {
+'Gen':'Genesis',
+'Exo':'Exodus',
+'Lev':'Leviticus',
+'Num':'Numbers',
+'Deu':'Deuteronomy',
+'Jos':'Joshua',
+'Jdg':'Judges',
+'Rut':'Ruth',
+'Sa1':'1 Samuel',
+'Sa2':'2 Samuel',
+'Kg1':'1 Kings',
+'Kg2':'2 Kings',
+'Ch1':'1 Chronicles',
+'Ch2':'2 Chronicles',
+'Ezr':'Ezra',
+'Neh':'Nehemiah',
+'Est':'Esther',
+'Job':'Job',
+'Psa':'Psalm',
+'Pro':'Proverbs',
+'Ecc':'Ecclesiastes',
+'Sol':'Song of Solomon',
+'Isa':'Isaiah',
+'Jer':'Jeremiah',
+'Lam':'Lamentations',
+'Eze':'Ezekiel',
+'Dan':'Daniel',
+'Hos':'Hosea',
+'Joe':'Joel',
+'Amo':'Amos',
+'Oba':'Obadiah',
+'Jon':'Jonah',
+'Mic':'Micah',
+'Nah':'Nahum',
+'Hab':'Habakkuk',
+'Zep':'Zephaniah',
+'Hag':'Haggai',
+'Zac':'Zechariah',
+'Mal':'Malachi ',
+'Mat':'Matthew',
+'Mar':'Mark',
+'Luk':'Luke',
+'Joh':'John',
+'Act':'Acts',
+'Rom':'Romans',
+'Co1':'1 Corinthians',
+'Co2':'2 Corinthians',
+'Gal':'Galatians',
+'Eph':'Ephesians',
+'Phi':'Philippians',
+'Col':'Colossians',
+'Th1':'1 Thessalonians',
+'Th2':'2 Thessalonians',
+'Ti1':'1 Timothy',
+'Ti2':'2 Timothy',
+'Tit':'Titus',
+'Plm':'Philemon',
+'Heb':'Hebrews',
+'Jam':'James',
+'Pe1':'1 Peter',
+'Pe2':'2 Peter',
+'Jo1':'1 John',
+'Jo2':'2 John',
+'Jo3':'3 John',
+'Jde':'Jude',
+'Rev':'Revelation'};
+
+var books2 = {
+'Genesis':'Gen',
+'Exodus':'Exo',
+'Leviticus':'Lev',
+'Numbers':'Num',
+'Deuteronomy':'Deu',
+'Joshua':'Jos',
+'Judges':'Jdg',
+'Ruth':'Rut',
+'1 Samuel':'Sa1',
+'2 Samuel':'Sa2',
+'1 Kings':'Kg1',
+'2 Kings':'Kg2',
+'1 Chronicles':'Ch1',
+'2 Chronicles':'Ch2',
+'Ezra':'Ezr',
+'Nehemiah':'Neh',
+'Esther':'Est',
+'Job':'Job',
+'Psalm':'Psa',
+'Proverbs':'Pro',
+'Ecclesiastes':'Ecc',
+'Song of Solomon':'Sol',
+'Isaiah':'Isa',
+'Jeremiah':'Jer',
+'Lamentations':'Lam',
+'Ezekiel':'Eze',
+'Daniel':'Dan',
+'Hosea':'Hos',
+'Joel':'Joe',
+'Amos':'Amo',
+'Obadiah':'Oba',
+'Jonah':'Jon',
+'Micah':'Mic',
+'Nahum':'Nah',
+'Habakkuk':'Hab',
+'Zephaniah':'Zep',
+'Haggai':'Hag',
+'Zechariah':'Zac',
+'Malachi ':'Mal',
+'Matthew':'Mat',
+'Mark':'Mar',
+'Luke':'Luk',
+'John':'Joh',
+'Acts':'Act',
+'Romans':'Rom',
+'1 Corinthians':'Co1',
+'2 Corinthians':'Co2',
+'Galatians':'Gal',
+'Ephesians':'Eph',
+'Philippians':'Phi',
+'Colossians':'Col',
+'1 Thessalonians':'Th1',
+'2 Thessalonians':'Th2',
+'1 Timothy':'Ti1',
+'2 Timothy':'Ti2',
+'Titus':'Tit',
+'Philemon':'Plm',
+'Hebrews':'Heb',
+'James':'Jam',
+'1 Peter':'Pe1',
+'2 Peter':'Pe2',
+'1 John':'Jo1',
+'2 John':'Jo2',
+'3 John':'Jo3',
+'Jude':'Jde',
+'Revelation':'Rev'}; 
+</script>
+
+<style type="text/css">
+<!--
+@media only screen and (max-width : 800px) { 
+html{font-size:11px;}
+#search {height: 16px !important; line-height: 16px !important; background-size:10px !important; font-size:1em !important; }
+#searchButton{height: 18px !important; font-size:0.9em !important; line-height:0.9em !important;}
+#referAddButton{float:left; color:#555; font-size: 0.9em; height:1.5em; line-height:0.9em; margin-top:4px;}
+}
+@media only screen and (min-width : 800px) { 
+html{font-size:14px;}
+#search {height: 22px !important; line-height: 22px !important; background-size:15px !important; font-size:1em !important; }
+#searchButton{height: 24px !important; font-size:0.9em !important; line-height:0.9em !important;}
+#referAddButton{float:left; color:#555; font-size: 0.9em; height:1.5em; line-height:0.9em; margin-top:2px;}
+} 
+.bibleText{font-size:1.2em;}
+
+-->
+</style>
